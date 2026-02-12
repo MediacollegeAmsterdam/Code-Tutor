@@ -174,6 +174,7 @@ Student data is stored in:
 
 ### Known Issues
 - First activation may take 3-5 seconds
+- A startup progress notification appears while Code Tutor initializes
 - Dashboard requires extension to be running
 - Chat requires VS Code Copilot API access
 
