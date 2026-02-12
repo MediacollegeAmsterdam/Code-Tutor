@@ -104,12 +104,18 @@ Student data is stored in:
 3. Access dashboard at: `http://localhost:51987/` or `http://localhost:51987/dashboard`
 4. Check Debug Console for "Dashboard running at..." message
 
-### Chat Participant Not Found
-**Fix:**
-1. Stop all debug sessions (`Shift+F5`)
-2. Close Extension Development Host windows
-3. Reload VS Code
-4. Press `F5` again
+### Chat Participant Registration Issues
+**What happens:** Extension automatically retries chat participant registration 3 times
+
+**If registration fails:**
+1. Look for error notification with suggested action
+2. Check VS Code version (requires 1.90+)
+3. If prompted, click "Reload Window" button
+4. Check Debug Console for detailed error messages
+
+**Manual fix (if needed):**
+1. Press `Ctrl+R` (or `Cmd+R` on Mac) to reload window
+2. Wait for "Chat participant @code-tutor is ready!" notification
 
 ### Port Already in Use
 **Fix:**

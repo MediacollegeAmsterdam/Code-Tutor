@@ -27,7 +27,7 @@ import { ExerciseCommand } from './commands/ExerciseCommand';
  * Chat Participant Feature - Main orchestrator for @tutor chat participant
  * 
  * Manages command registration, routing, and general AI prompt handling.
- * Replaces the inline chat handler in extension.ts.
+ * Includes retry logic and verification for reliable registration.
  */
 export class ChatParticipantFeature {
 	private registry: CommandRegistry;
@@ -35,6 +35,7 @@ export class ChatParticipantFeature {
 	private extensionContext: vscode.ExtensionContext;
 	private services: any;
 	private lastCommand: string | undefined;
+	private isRegistered: boolean = false;
 	
 	constructor(
 		extensionContext: vscode.ExtensionContext,
@@ -47,23 +48,82 @@ export class ChatParticipantFeature {
 	
 	/**
 	 * Initialize the chat participant and register all commands
+	 * Includes retry logic for reliable registration
 	 */
-	initialize(): vscode.Disposable {
+	async initialize(): Promise<vscode.Disposable | undefined> {
 		// Register all 18 commands
 		this.registerCommands();
 		
-		// Create chat participant
-		this.participant = vscode.chat.createChatParticipant(
-			'chat-tutorial.code-tutor',
-			this.handler.bind(this)
-		);
+		// Attempt registration with retry logic
+		const maxRetries = 3;
+		const retryDelay = 1000; // 1 second
 		
-		// Register followup provider
-		this.participant.followupProvider = {
-			provideFollowups: this.provideFollowups.bind(this)
-		};
+		for (let attempt = 1; attempt <= maxRetries; attempt++) {
+			try {
+				console.log(`[Chat Participant] Registration attempt ${attempt}/${maxRetries}...`);
+				
+				// Check if chat API is available
+				if (!vscode.chat || typeof vscode.chat.createChatParticipant !== 'function') {
+					throw new Error('VS Code Chat API not available. Update VS Code to version 1.90+');
+				}
+				
+				// Create chat participant
+				this.participant = vscode.chat.createChatParticipant(
+					'chat-tutorial.code-tutor',
+					this.handler.bind(this)
+				);
+				
+				if (!this.participant) {
+					throw new Error('Failed to create chat participant (returned undefined)');
+				}
+				
+				// Register followup provider
+				this.participant.followupProvider = {
+					provideFollowups: this.provideFollowups.bind(this)
+				};
+				
+				// Verify registration succeeded
+				this.isRegistered = true;
+				console.log('[Chat Participant] ✅ Successfully registered @code-tutor participant');
+				vscode.window.showInformationMessage('Code Tutor: Chat participant @code-tutor is ready!');
+				
+				return this.participant;
+				
+			} catch (error) {
+				console.error(`[Chat Participant] Registration attempt ${attempt} failed:`, error);
+				
+				if (attempt === maxRetries) {
+					// Final attempt failed - show user-friendly error
+					const errorMsg = error instanceof Error ? error.message : String(error);
+					console.error('[Chat Participant] ❌ All registration attempts failed');
+					
+					vscode.window.showErrorMessage(
+						`Code Tutor: Failed to register chat participant. ${errorMsg}. Try reloading the window (Ctrl+R).`,
+						'Reload Window',
+						'Dismiss'
+					).then(action => {
+						if (action === 'Reload Window') {
+							vscode.commands.executeCommand('workbench.action.reloadWindow');
+						}
+					});
+					
+					return undefined;
+				}
+				
+				// Wait before retry
+				console.log(`[Chat Participant] Retrying in ${retryDelay}ms...`);
+				await new Promise(resolve => setTimeout(resolve, retryDelay));
+			}
+		}
 		
-		return this.participant;
+		return undefined;
+	}
+	
+	/**
+	 * Check if the chat participant is successfully registered
+	 */
+	public isParticipantRegistered(): boolean {
+		return this.isRegistered && this.participant !== undefined;
 	}
 	
 	/**
