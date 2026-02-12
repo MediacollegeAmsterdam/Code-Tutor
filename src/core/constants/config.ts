@@ -25,9 +25,18 @@ export const COMMON_HEADERS = {
 
 /**
  * Server port configuration
+ *
+ * DASHBOARD_PORT: Primary port for student/teacher dashboard (51987)
+ * PROMPT_SERVER_PORT: Port for AI prompt server (3001)
+ *
+ * If ports are in use, the system will automatically try alternative ports:
+ * - Dashboard: 51987-51990
+ * - Prompt Server: 3001-3004
  */
 export const DASHBOARD_PORT = 51987;
+export const DASHBOARD_PORT_RANGE = { min: 51987, max: 51990 };
 export const PROMPT_SERVER_PORT = 3001;
+export const PROMPT_SERVER_PORT_RANGE = { min: 3001, max: 3004 };
 
 /**
  * Year level configuration with difficulty multipliers and focus areas
