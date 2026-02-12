@@ -46,7 +46,9 @@ export class ExtensionUtils {
 	 * Check if model is "auto" or similar
 	 */
 	static isAutoModel(model: vscode.LanguageModelChat | undefined): boolean {
-		if (!model) return true;
+		if (!model) {
+            return true;
+        }
 		const fields = [model.id, model.vendor, model.family, model.name].map(f => (f || '').toLowerCase());
 		return fields.some(v => v === 'auto' || v.includes('/auto') || v.includes(' auto'));
 	}
@@ -84,7 +86,9 @@ export class ExtensionUtils {
 	): Promise<vscode.LanguageModelChat | null> {
 		try {
 			const list = await this.listConcreteModels();
-			if (list.length === 0) return null;
+			if (list.length === 0) {
+                return null;
+            }
 
 			if (model && !this.isAutoModel(model)) {
 				const found = list.find(m => m.id === model.id);
