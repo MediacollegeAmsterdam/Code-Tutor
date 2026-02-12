@@ -22,6 +22,7 @@ import {TeacherStatsService} from './features/shared/TeacherStatsService';
 
 // Services
 import {StudentService} from './core/services/StudentService';
+import {findAvailablePort, isPortAvailable, getPortsInUse, type PortConfig} from './core/services/PortManager';
 
 // Core Types
 import type {
@@ -48,7 +49,9 @@ import {
     ACHIEVEMENTS_THRESHOLDS,
     COMMON_HEADERS,
     DASHBOARD_PORT,
+    DASHBOARD_PORT_RANGE,
     PROMPT_SERVER_PORT,
+    PROMPT_SERVER_PORT_RANGE,
     YEAR_LEVEL_CONFIG,
     LEARNING_PATHS,
     RESOURCE_LIBRARY
@@ -70,6 +73,10 @@ let assignmentFeature: AssignmentFeature | undefined;
 let liveDemoFeature: LiveDemoFeature | undefined;
 let slideshowFeature: SlideshowFeature | undefined;
 let promptServer: ChildProcess | undefined;
+
+// Runtime port allocation (may differ from constants if ports are in use)
+let actualDashboardPort = DASHBOARD_PORT;
+let actualPromptServerPort = PROMPT_SERVER_PORT;
 
 // Live Demo State - kept for backward compatibility
 let liveDemoState: LiveDemoState = {
@@ -111,6 +118,30 @@ export async function activate(context: vscode.ExtensionContext) {
 			// This line of code will only be executed once when your extension is activated
 			console.log('Congratulations, your extension "code-tutor" is now active!');
 			logActivation('Activation started');
+
+			// ========== PORT DETECTION ==========
+			reportProgress('Detecting available ports...', 10);
+
+			// Detect dashboard port
+			const dashboardPortConfig: PortConfig = {
+				preferredPort: DASHBOARD_PORT,
+				minPort: DASHBOARD_PORT_RANGE.min,
+				maxPort: DASHBOARD_PORT_RANGE.max,
+				serviceId: 'dashboard'
+			};
+			const dashboardAllocation = await findAvailablePort(dashboardPortConfig);
+			actualDashboardPort = dashboardAllocation.port;
+
+			if (dashboardAllocation.portWasChanged) {
+				const message = `Dashboard port ${DASHBOARD_PORT} in use, using ${actualDashboardPort} instead`;
+				logActivation(message);
+				console.log(`? ${message}`);
+			} else {
+				logActivation(`Dashboard will use preferred port ${actualDashboardPort}`);
+			}
+
+			// Save to workspace state for persistence
+			context.workspaceState.update('codeTutor.dashboardPort', actualDashboardPort);
 
 			// Track last assignment action for chat feedback
 			let lastAssignmentAction: { action: string; assignmentId: string; timestamp: string } | null = null;
@@ -381,16 +412,22 @@ export async function activate(context: vscode.ExtensionContext) {
 					context
 				});
 
-				server.listen(DASHBOARD_PORT, () => {
-					console.log(`Code Tutor Dashboard running at http://localhost:${DASHBOARD_PORT}`);
+				server.listen(actualDashboardPort, () => {
+					const dashboardUrl = `http://localhost:${actualDashboardPort}`;
+					console.log(`Code Tutor Dashboard running at ${dashboardUrl}`);
 					console.log('? Integrated prompt server endpoints are active');
 					console.log(`? Dashboard feature initialized with ${dashboardFeature!.getClientCount()} SSE clients`);
+
+					// Store actual port for dashboard URL generation
+					context.workspaceState.update('codeTutor.dashboardPort', actualDashboardPort);
 				});
 
 				server.on('error', (e: NodeJS.ErrnoException) => {
 					if (e.code === 'EADDRINUSE') {
-						console.log('Dashboard port already in use, server may already be running');
-						vscode.window.showWarningMessage(`Port ${DASHBOARD_PORT} is already in use. Server may already be running.`);
+						const message = `Dashboard port ${actualDashboardPort} in use. Try "Code Tutor: Restart Dashboard" command.`;
+						console.log(message);
+						logActivation(message);
+						vscode.window.showWarningMessage(message);
 					} else {
 						console.error('Server error:', e);
 						vscode.window.showErrorMessage(`Failed to start server: ${e.message}`);
@@ -399,6 +436,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				server.on('listening', () => {
 					console.log('? Server successfully started and listening');
+					logActivation(`Server started on port ${actualDashboardPort}`);
 				});
 			};
 
@@ -408,7 +446,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				if (dashboardFeature) {
 					await dashboardFeature.openInBrowser();
 				} else {
-					const url = `http://localhost:${DASHBOARD_PORT}`;
+					const url = `http://localhost:${actualDashboardPort}`;
 					vscode.env.openExternal(vscode.Uri.parse(url));
 					console.log(`Dashboard opened at ${url}`);
 				}
@@ -470,6 +508,73 @@ export async function activate(context: vscode.ExtensionContext) {
 			});
 			context.subscriptions.push(addSlideCommand);	// The command has been defined in the package.json file
 
+			// Register check port status command
+			const checkPortsCommand = vscode.commands.registerCommand('code-tutor.checkPorts', async () => {
+				const portsToCheck = [
+					actualDashboardPort,
+					actualPromptServerPort,
+					...Array.from({length: 3}, (_, i) => DASHBOARD_PORT_RANGE.min + i + 1),
+					...Array.from({length: 3}, (_, i) => PROMPT_SERVER_PORT_RANGE.min + i + 1)
+				];
+
+				const portsInUse = await getPortsInUse(portsToCheck);
+
+				let message = '**Port Status:**\n\n';
+				message += `• Dashboard: **${actualDashboardPort}** (primary)\n`;
+				message += `• Prompt Server: **${actualPromptServerPort}** (primary)\n\n`;
+
+				const inUseCount = Array.from(portsInUse.values()).filter(x => x).length;
+				if (inUseCount > 0) {
+					message += `**${inUseCount} port(s) in use**\n`;
+					for (const [port, inUse] of portsInUse) {
+						message += inUse ? `  ❌ Port ${port} (in use)\n` : `  ✅ Port ${port} (available)\n`;
+					}
+				} else {
+					message += 'All scanned ports are available.';
+				}
+
+				vscode.window.showInformationMessage(message);
+				activationOutput.appendLine(message);
+			});
+			context.subscriptions.push(checkPortsCommand);
+
+			// Register restart dashboard command
+			const restartDashboardCommand = vscode.commands.registerCommand('code-tutor.restartDashboard', async () => {
+				try {
+					reportProgress('Restarting dashboard...', 0);
+
+					// Close existing server
+					if (server) {
+						server.close();
+						server = undefined;
+					}
+					sseManager = undefined;
+					dashboardFeature = undefined;
+
+					// Detect available port again
+					const dashboardPortConfig: PortConfig = {
+						preferredPort: DASHBOARD_PORT,
+						minPort: DASHBOARD_PORT_RANGE.min,
+						maxPort: DASHBOARD_PORT_RANGE.max,
+						serviceId: 'dashboard'
+					};
+					const dashboardAllocation = await findAvailablePort(dashboardPortConfig);
+					actualDashboardPort = dashboardAllocation.port;
+					context.workspaceState.update('codeTutor.dashboardPort', actualDashboardPort);
+
+					// Start new server
+					startServer();
+
+					const successMsg = `Dashboard restarted on port ${actualDashboardPort}`;
+					vscode.window.showInformationMessage(successMsg);
+					logActivation(successMsg);
+				} catch (error) {
+					const errorMsg = error instanceof Error ? error.message : String(error);
+					vscode.window.showErrorMessage(`Failed to restart dashboard: ${errorMsg}`);
+					logActivation(`Dashboard restart failed: ${errorMsg}`);
+				}
+			});
+			context.subscriptions.push(restartDashboardCommand);
 			// Register restart prompt server command
 			const restartServerCommand = vscode.commands.registerCommand('code-tutor.restartPromptServer', async () => {
 				console.log('?? Checking prompt server status...');
@@ -605,7 +710,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			reportProgress('Ready', 15);
 			const activationElapsedMs = Date.now() - activationStartMs;
+
+			// Show completion with port information
 			logActivation(`Activation completed in ${activationElapsedMs}ms`);
+			logActivation(`Dashboard: http://localhost:${actualDashboardPort}`);
+			logActivation(`Prompt Server: port ${actualPromptServerPort}`);
+
+			// Show a completion notification
+			vscode.window.showInformationMessage(
+				`Code Tutor ready! Dashboard: http://localhost:${actualDashboardPort}`
+			);
 		} catch (error) {
 			const activationElapsedMs = Date.now() - activationStartMs;
 			const errorMessage = error instanceof Error ? error.message : String(error);

@@ -59,7 +59,26 @@ The extension uses these ports:
 - **Dashboard:** `51987` (HTTP server)
 - **Prompt Server:** `3001` (internal)
 
-If ports are in use, adjust in: `src/core/constants/config.ts`
+**Automatic Port Detection:**
+If your preferred ports are in use, Code Tutor will automatically try alternative ports:
+- Dashboard: `51987-51990`
+- Prompt Server: `3001-3004`
+
+The actual port in use is shown:
+- In the activation notification
+- In the Output panel ("Code Tutor" channel)
+- Via the `Code Tutor: Check Ports` command
+
+**Port Conflict Resolution:**
+If both the preferred port and all fallback ports are in use:
+1. Run the `Code Tutor: Restart Dashboard` command
+2. Check the Output panel for the actual port in use
+3. Run `Code Tutor: Check Ports` to see which ports are available
+
+**Manual Port Override:**
+To override ports, edit: `src/core/constants/config.ts`
+- Update `DASHBOARD_PORT` constant
+- Restart the extension
 
 ### Data Storage
 
@@ -118,16 +137,21 @@ Student data is stored in:
 2. Wait for "Chat participant @code-tutor is ready!" notification
 
 ### Port Already in Use
-**Fix:**
-1. Check what's using port 51987:
-   ```bash
-   # Windows
-   netstat -ano | findstr :51987
-   
-   # Mac/Linux
-   lsof -i :51987
-   ```
-2. Kill the process or change port in config
+**What happens:** Code Tutor automatically detects port conflicts and tries alternative ports (51987-51990)
+
+**If still failing:**
+1. Run: `Code Tutor: Check Ports` (shows which ports are in use)
+2. Run: `Code Tutor: Restart Dashboard` (finds new available port)
+3. Check Output panel for actual dashboard URL
+
+**Manual diagnosis (if needed):**
+```bash
+# Windows
+netstat -ano | findstr :51987
+
+# Mac/Linux
+lsof -i :51987
+```
 
 ---
 
