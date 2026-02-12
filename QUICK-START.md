@@ -71,10 +71,12 @@ URL: `http://localhost:51987/` or `http://localhost:51987/dashboard`
 - Access at: `http://localhost:51987/` or `http://localhost:51987/dashboard`
 - Refresh browser if needed
 
-### Issue: Chat Says "@tutor not found"
+### Issue: Chat Participant Not Appearing
 **Fix:**
-- Reload window: `Ctrl+R` or `Cmd+R`
-- Make sure you're in VS Code Chat (not terminal)
+- Wait 5-10 seconds for automatic retry (extension attempts 3 times)
+- Check for notification: "Chat participant @code-tutor is ready!"
+- If error shown, follow the suggested action
+- Make sure you're in VS Code Chat panel (View → Chat)
 
 ### Issue: Extension Won't Activate
 **Fix:**

@@ -455,6 +455,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	// ========== NEW: CHAT PARTICIPANT FEATURE ==========
+	// Initialize chat participant with retry logic
 	const chatServices = {
 		updateProgress,
 		broadcastSSEUpdate,
@@ -466,7 +467,21 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 	
 	const chatFeature = new ChatParticipantFeature(context, chatServices);
-	const chatParticipant = chatFeature.initialize();
+	
+	// Register participant asynchronously with verification
+	chatFeature.initialize().then(chatParticipant => {
+		if (chatParticipant) {
+			context.subscriptions.push(chatParticipant);
+			console.log('[Extension] Chat participant registered and added to subscriptions');
+		} else {
+			console.warn('[Extension] Chat participant registration failed - feature unavailable');
+		}
+	}).catch(error => {
+		console.error('[Extension] Unexpected error during chat participant initialization:', error);
+		vscode.window.showWarningMessage(
+			'Code Tutor: Chat participant may not be available. Some features may be limited.'
+		);
+	});
 	// ========== END NEW FEATURE ==========
 
 	// Start Discord bot and Dashboard server automatically when extension activates
@@ -528,9 +543,6 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Starting dashboard server with integrated prompt server...');
 	startServer();
 	console.log('Dashboard server startup initiated');
-
-	context.subscriptions.push(chatParticipant);
-
 }
 
 // This method is called when your extension is deactivated
