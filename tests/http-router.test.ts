@@ -478,7 +478,7 @@ describe('Slide Routes Tests', () => {
 			assert.strictEqual(slides[0].id, 'slide-123');
 		});
 
-		test('T132: should return 500 if slideshowFeature is undefined', async () => {
+		test('T132: should return 503 if slideshowFeature is undefined', async () => {
 			const handler = createAddSlideHandler(undefined as any);
 
 			const slideData = { id: 'slide-1', title: 'Test' };
@@ -488,9 +488,10 @@ describe('Slide Routes Tests', () => {
 
 			await handler(req, res, {}, slideData);
 
-			assert.strictEqual(res.statusCode, 500);
+			assert.strictEqual(res.statusCode, 503);
 			const body = res.getBodyAsJson();
 			assert.strictEqual(body.error, 'Slideshow feature not available');
+			assert.ok(body.message); // Should have user-friendly message
 		});
 
 		test('T133: should handle errors during slide addition', async () => {
@@ -553,7 +554,7 @@ describe('Slide Routes Tests', () => {
 			assert.strictEqual(body.error, 'Slide ID required');
 		});
 
-		test('T136: should return 500 if slideshowFeature is undefined', async () => {
+		test('T136: should return 503 if slideshowFeature is undefined', async () => {
 			const handler = createDeleteSlideHandler(undefined as any);
 
 			const req = new MockRequest('DELETE', '/api/slides/123') as any;
@@ -561,9 +562,10 @@ describe('Slide Routes Tests', () => {
 
 			await handler(req, res, { id: '123' }, undefined);
 
-			assert.strictEqual(res.statusCode, 500);
+			assert.strictEqual(res.statusCode, 503);
 			const body = res.getBodyAsJson();
 			assert.strictEqual(body.error, 'Slideshow feature not available');
+			assert.ok(body.message); // Should have user-friendly message
 		});
 	});
 

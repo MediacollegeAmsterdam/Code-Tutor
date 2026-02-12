@@ -16,6 +16,13 @@ import { SlideshowFeature } from '../features/slideshow';
  * 
  * Manages lifecycle and dependencies of all services and features.
  * Implements Singleton pattern for centralized service access.
+ * 
+ * Initialization Order:
+ * 1. Infrastructure services (storage, HTTP, SSE)
+ * 2. Feature modules (assignment, livestream, slideshow, dashboard)
+ * 3. Route registration (depends on all features being ready)
+ * 
+ * All features are guaranteed to be initialized before the constructor returns.
  */
 export class ServiceContainer {
 	private static instance: ServiceContainer | undefined;
@@ -69,6 +76,28 @@ export class ServiceContainer {
 			sseManager: this.sseManager,
 			context
 		});
+		
+		// Validate all features initialized
+		this.validateInitialization();
+	}
+	
+	/**
+	 * Validate that all features are properly initialized
+	 * @throws Error if any feature is not initialized
+	 */
+	private validateInitialization(): void {
+		const features = {
+			assignmentFeature: this.assignmentFeature,
+			liveDemoFeature: this.liveDemoFeature,
+			slideshowFeature: this.slideshowFeature,
+			dashboardFeature: this.dashboardFeature
+		};
+		
+		for (const [name, feature] of Object.entries(features)) {
+			if (!feature) {
+				throw new Error(`ServiceContainer: ${name} failed to initialize`);
+			}
+		}
 	}
 	
 	/**
