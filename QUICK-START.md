@@ -48,6 +48,7 @@ Type in Chat panel (don't forget `@tutor` prefix):
 
 ### 📊 Dashboard Features
 Open with: `Ctrl+Shift+P` → "Code Tutor: Open Dashboard"
+URL: `http://localhost:51987/` or `http://localhost:51987/dashboard`
 
 - Track your coding progress
 - View exercises completed
@@ -63,11 +64,12 @@ Open with: `Ctrl+Shift+P` → "Code Tutor: Open Dashboard"
 
 ## Common Issues & Fixes
 
-### Issue: "Not Found" Error on Dashboard
+### Issue: Dashboard Not Loading
 **Fix:** 
 - Press `F5` to explicitly start extension
-- Wait 3 seconds for server
-- Refresh browser
+- Wait 3 seconds for HTTP server to start
+- Access at: `http://localhost:51987/` or `http://localhost:51987/dashboard`
+- Refresh browser if needed
 
 ### Issue: Chat Says "@tutor not found"
 **Fix:**

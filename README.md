@@ -85,6 +85,25 @@ Configure Code Tutor through VS Code settings (`Ctrl+,`):
 3. Search for "Code Tutor"
 4. Enter your API key in the `codeTutor.apiKey` field
 
+### Dashboard & HTTP Endpoints
+
+The extension runs a local HTTP server for the dashboard and API:
+
+**Dashboard URLs:**
+- `http://localhost:51987/` (root)
+- `http://localhost:51987/dashboard` (alias)
+
+**API Endpoints:**
+- `/api/progress` - Student progress data
+- `/api/assignments` - Assignment management
+- `/api/slides` - Slideshow management
+- `/api/teacher/*` - Teacher dashboard features
+- `/events` - Server-Sent Events for real-time updates
+
+**Port Configuration:**
+- Dashboard: `51987` (DASHBOARD_PORT)
+- Prompt Server: `3001` (PROMPT_SERVER_PORT)
+
 ## 🏗️ Project Structure
 
 ```
