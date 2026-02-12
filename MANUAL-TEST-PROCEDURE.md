@@ -14,19 +14,13 @@ npm run compile
 ```
 **Expected:** ✅ 0 errors
 
-### 2. Start Prompt Server
-```bash
-node prompt-server.js
-```
-**Expected:** Server running on port 3000  
-**Keep this terminal open**
-
-**Note:** For manual testing, the prompt server runs on port 3000. In production, the dashboard runs on port 51987 (DASHBOARD_PORT constant).
-
-### 3. Start Extension
+### 2. Start Extension
 - Press `F5` in VS Code (Run Extension)
 - New Extension Development Host window opens
 - Check Debug Console for: `"code-tutor" is now active!`
+- **Expected:** Prompt server auto-starts on port 3000
+
+**Note:** For manual testing, the prompt server runs on port 3000. In production, the dashboard runs on port 51987 (DASHBOARD_PORT constant).
 
 ---
 
@@ -173,7 +167,7 @@ node prompt-server.js
 3. **Expected:**
    - Response appears in chat
    - No timeout errors
-4. Stop prompt server (Ctrl+C in terminal)
+4. Temporarily stop the prompt server (e.g., end the node process) if you need to verify failure handling
 5. Try same chat query
 6. **Expected:**
    - Graceful failure message
@@ -254,7 +248,7 @@ Fill in results:
 ## Troubleshooting
 
 ### Issue: "Prompt server not responding"
-**Fix:** Ensure `node prompt-server.js` is running in separate terminal
+**Fix:** Run the `Code Tutor: Restart Prompt Server` command, then re-check the Debug Console
 
 ### Issue: "Command not found"
 **Fix:** Reload window (Cmd/Ctrl + R in Extension Host)
