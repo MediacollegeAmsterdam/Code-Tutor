@@ -21,6 +21,8 @@ node prompt-server.js
 **Expected:** Server running on port 3000  
 **Keep this terminal open**
 
+**Note:** For manual testing, the prompt server runs on port 3000. In production, the dashboard runs on port 51987 (DASHBOARD_PORT constant).
+
 ### 3. Start Extension
 - Press `F5` in VS Code (Run Extension)
 - New Extension Development Host window opens
@@ -110,7 +112,7 @@ node prompt-server.js
 ### ✅ Test 5: Dashboard HTTP Route
 **Feature:** Student dashboard (HTTP server + routes)
 
-1. Open browser: `http://localhost:3000/` (root path, NOT /dashboard)
+1. Open browser: `http://localhost:3000/` or `http://localhost:3000/dashboard` (both URLs work)
 2. **Expected:**
    - Dashboard loads with student stats
    - Shows exercises completed
@@ -256,12 +258,6 @@ Fill in results:
 
 ### Issue: "Command not found"
 **Fix:** Reload window (Cmd/Ctrl + R in Extension Host)
-
-### Issue: "Dashboard shows 404"
-**Fix:** 
-1. Dashboard is at root path: Use `http://localhost:3000/` (NOT `/dashboard`)
-2. Check HTTP server started (Debug Console should show "Dashboard running at...")
-3. Verify port 3000 not in use: `netstat -ano | findstr :3000`
 
 ### Issue: "Tests failing"
 **Fix:** 

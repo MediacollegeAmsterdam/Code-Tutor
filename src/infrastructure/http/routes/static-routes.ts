@@ -5,6 +5,11 @@ import * as vscode from 'vscode';
 
 /**
  * Static file serving routes for dashboard assets
+ * 
+ * URL Pattern:
+ * - `/` and `/dashboard` both serve index.html (consistent user experience)
+ * - All other paths serve static files from the dashboard/ directory
+ * - Supports .html, .css, .js, .json, .png, .jpg, .svg files
  */
 
 /**
@@ -17,7 +22,8 @@ export function createStaticFileHandler(
 	return async (req, res, params, body) => {
 		// Get URL from request object (not params, since this is a fallback route)
 		const url = req.url || '/';
-		let filePath = url === '/' ? '/index.html' : url;
+		// Serve dashboard for both root and /dashboard paths
+		let filePath = (url === '/' || url === '/dashboard') ? '/index.html' : url;
 		const fullPath = path.join(context.extensionPath, 'dashboard', filePath);
 
 		// Determine content type

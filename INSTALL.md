@@ -97,11 +97,12 @@ Student data is stored in:
 ### Extension Won't Activate
 **Fix:** Reload window (`Ctrl+R` or `Cmd+R`)
 
-### Dashboard Shows "Not Found"
+### Dashboard Not Loading
 **Fix:** 
 1. Check extension is running (press `F5`)
-2. Wait 2-3 seconds for server to start
-3. Try: `http://localhost:51987/` (root path)
+2. Wait 2-3 seconds for HTTP server to start
+3. Access dashboard at: `http://localhost:51987/` or `http://localhost:51987/dashboard`
+4. Check Debug Console for "Dashboard running at..." message
 
 ### Chat Participant Not Found
 **Fix:**
