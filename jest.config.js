@@ -4,7 +4,12 @@ module.exports = {
   roots: ['<rootDir>/tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: {
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+      },
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -26,13 +31,5 @@ module.exports = {
     '^vscode$': '<rootDir>/tests/helpers/__mocks__/vscode.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/helpers/setup.ts'],
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-      },
-    },
-  },
   verbose: true,
 };

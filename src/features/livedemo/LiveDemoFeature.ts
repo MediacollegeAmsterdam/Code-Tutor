@@ -124,8 +124,9 @@ export class LiveDemoFeature {
     private startWatching(): void {
         // Watch for text changes in active editor
         this.watcher = vscode.workspace.onDidChangeTextDocument((event) => {
-            if (!this.state.active) return;
-
+            if (!this.state.active) {
+                return;
+            }
             const editor = vscode.window.activeTextEditor;
             if (editor && event.document === editor.document) {
                 this.state.code = editor.document.getText();
