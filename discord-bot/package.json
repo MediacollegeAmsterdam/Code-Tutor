@@ -1,0 +1,22 @@
+{
+  "name": "code-tutor-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for Code Tutor VS Code extension - displays your learning progress",
+  "main": "bot.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "code-tutor",
+    "vscode"
+  ],
+  "author": "",
+  "license": "MIT"
+}

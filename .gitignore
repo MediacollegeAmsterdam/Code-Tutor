@@ -1,0 +1,77 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Production build
+out/
+dist/
+build/
+
+# TypeScript
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# VS Code extension testing
+.vscode-test/
+*.vsix
+
+# IDEs
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.eslintcache
+.cache/
+.parcel-cache/
+
+# Temporary files
+*.tmp
+.temp/
+temp/
+
+# Discord bot specific
+discord-bot/.env
+discord-bot/node_modules/
+
+# Dashboard build (if compiled)
+dashboard/dist/
+dashboard/build/
+
+# Local development
+.local
+*.local
+session/
+sessions/
+/assignments/
+/.specify/
+/specs/
+/docs/

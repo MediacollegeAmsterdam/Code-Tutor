@@ -1,0 +1,160 @@
+{
+  "name": "code-tutor",
+  "displayName": "Code Tutor",
+  "description": "An AI-powered coding tutor that helps you learn programming through feedback, exercises, and interactive learning.",
+  "version": "0.1.0",
+  "publisher": "code-tutor-dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/code-tutor"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Education",
+    "Other"
+  ],
+  "activationEvents": [
+    "onChatParticipant:chat-tutorial.code-tutor"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "code-tutor.openDashboard",
+        "title": "Code Tutor: Open Dashboard"
+      },
+      {
+        "command": "code-tutor.addSlide",
+        "title": "Code Tutor: Add Selected Code to Slideshow"
+      },
+      {
+        "command": "code-tutor.helloWorld",
+        "title": "Code Tutor: Hello World"
+      },
+      {
+        "command": "code-tutor.saveCodeSlide",
+        "title": "Code Tutor: Save as Learning Slide"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "code-tutor.addSlide",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s",
+        "when": "editorHasSelection"
+      }
+    ],
+    "chatParticipants": [
+      {
+        "id": "chat-tutorial.code-tutor",
+        "fullName": "Code Tutor",
+        "name": "tutor",
+        "description": "What can I teach you?",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "explain",
+            "description": "Get a clear explanation of code or concepts."
+          },
+          {
+            "name": "debug",
+            "description": "Find and fix bugs in your code."
+          },
+          {
+            "name": "refactor",
+            "description": "Get suggestions to improve your code."
+          },
+          {
+            "name": "quiz",
+            "description": "Test your knowledge with programming quizzes."
+          },
+          {
+            "name": "review",
+            "description": "Get a thorough code review."
+          },
+          {
+            "name": "concept",
+            "description": "Learn about programming concepts."
+          },
+          {
+            "name": "exercise",
+            "description": "Get coding exercises and assignments tailored to your level."
+          },
+          {
+            "name": "assignment-feedback",
+            "description": "View your assignment progress and feedback."
+          },
+          {
+            "name": "progress",
+            "description": "View your learning progress and achievements."
+          },
+          {
+            "name": "dashboard",
+            "description": "Open the visual progress dashboard."
+          },
+          {
+            "name": "learn",
+            "description": "Browse learning paths and structured courses."
+          },
+          {
+            "name": "feedback",
+            "description": "Get progressive feedback on your code with tips and examples."
+          },
+          {
+            "name": "resources",
+            "description": "Browse curated learning resources and documentation."
+          },
+          {
+            "name": "setlevel",
+            "description": "Set your year level (1-4) for adaptive difficulty."
+          },
+          {
+            "name": "help",
+            "description": "Show all available commands and your profile."
+          },
+          {
+            "name": "save-slide",
+            "description": "Save selected code as educational slide for beginners."
+          },
+          {
+            "name": "add-slide",
+            "description": "Add selected code to learning slideshow automatically."
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:vscode": "vscode-test",
+    "package": "vsce package",
+    "package:no-deps": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.106.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9.39.1",
+    "jest": "^30.2.0",
+    "nyc": "^17.1.0",
+    "ts-complex": "^1.0.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
+  }
+}

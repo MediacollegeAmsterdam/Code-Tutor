@@ -1,0 +1,1 @@
+export { SlideshowFeature } from './SlideshowFeature';

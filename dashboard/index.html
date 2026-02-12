@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Tutor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Sticky Note Style Explanation Card -->
+    <div id="explanationSticky" class="sticky-note" style="display: none;">
+        <div class="sticky-note-header" id="stickyHeader">
+            <div class="sticky-note-title">
+                <span class="sticky-note-icon">💡</span>
+                <span id="explanationTitle">AI Uitleg</span>
+            </div>
+            <div class="sticky-note-controls">
+                <button class="sticky-note-btn minimize" id="minimizeBtn" onclick="minimizeSticky()" title="Minimize">−</button>
+                <button class="sticky-note-btn close" onclick="closeExplanation()" title="Sluiten">✕</button>
+            </div>
+        </div>
+        <div class="sticky-note-content" id="explanationContent">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>AI genereert uitleg...</p>
+            </div>
+        </div>
+        <div class="sticky-note-footer">
+            <button class="sticky-btn secondary" onclick="closeExplanation()">Sluiten</button>
+            <button class="sticky-btn primary" id="generateMoreBtn" onclick="generateMoreExplanation()" style="display: none;">📚 Meer</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🎓 Code Tutor Dashboard</h1>
+                    <p id="headerSubtitle">Volg je voortgang en ontgrendel achievements</p>
+                </div>
+                <div class="mode-selector">
+                    <button class="mode-btn active" id="studentModeBtn" onclick="switchMode('student')">👨‍🎓 Student</button>
+                    <button class="mode-btn" id="teacherModeBtn" onclick="switchMode('teacher')">👨‍🏫 Teacher</button>
+                </div>
+            </div>
+            <div id="connectionStatus"><span style="color: #9ca3af;">● Verbinden...</span></div>
+        </header>
+        <div id="studentView">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="icon">📊</div><div class="value" id="totalInteractions">0</div><div class="label">Totaal</div></div>
+            <div class="stat-card"><div class="icon">🔥</div><div class="value" id="currentStreak">0</div><div class="label">Streak</div></div>
+            <div class="stat-card"><div class="icon">⭐</div><div class="value" id="commandsUsed">0</div><div class="label">Commands</div></div>
+            <div class="stat-card"><div class="icon">🏆</div><div class="value" id="achievementsUnlocked">0</div><div class="label">Achievements</div></div>
+            <div class="stat-card"><div class="icon">📅</div><div class="value" id="thisMonth">0</div><div class="label">Deze Maand</div></div>
+        </div>
+        <div class="section">
+            <h2>📈 Skill Level</h2>
+            <div class="skill-level">
+                <div class="skill-badge" id="skillBadge">Beginner</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar"><div class="progress-bar-fill" id="skillProgress" style="width: 0%"></div></div>
+                    <div class="progress-label" id="skillLabel">0 / 20 tot volgende niveau</div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>🎓 Year Level</h2>
+            <div style="padding: 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1)); border-radius: 12px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 12px;" id="yearEmoji">📚</div>
+                <div style="font-size: 24px; font-weight: bold; color: #e5e7eb; margin-bottom: 8px;" id="yearDisplay">Not Set</div>
+                <div style="font-size: 14px; color: #9ca3af;">Change with <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">/setlevel [1-4]</code></div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>🏅 Badges</h2>
+            <div class="badges-grid" id="badgesGrid"></div>
+        </div>
+        <div class="grid-2">
+            <div class="section">
+                <h2>📋 Command Gebruik</h2>
+                <div class="command-list" id="commandList"><div class="no-data">Nog geen commands gebruikt</div></div>
+            </div>
+            <div class="section">
+                <h2>🏅 Achievements</h2>
+                <div class="achievements" id="achievementsList"></div>
+            </div>
+        </div>
+        <div class="grid-2" style="grid-template-columns: auto auto; justify-content: flex-start; gap: 12px;">
+            <div class="section chart-section">
+                <h2>📊 Voortgang</h2>
+                <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchChart('month')">Maand</button>
+                    <button class="chart-tab" onclick="switchChart('week')">Week</button>
+                    <button class="chart-tab" onclick="switchChart('commands')">Cmds</button>
+                </div>
+                <div class="chart-wrapper"><canvas id="progressChart"></canvas></div>
+            </div>
+            <div class="section chart-section heatmap-section">
+                <h2>🗓️ Heatmap</h2>
+                <div id="heatmapContainer" class="heatmap-container"></div>
+                <div class="heatmap-legend">
+                    <span>Min</span>
+                    <div class="heatmap-legend-item" style="background: rgba(255,255,255,0.05)"></div>
+                    <div class="heatmap-legend-item" style="background: rgba(96, 165, 250, 0.3)"></div>
+                    <div class="heatmap-legend-item" style="background: rgba(96, 165, 250, 0.7)"></div>
+                    <div class="heatmap-legend-item" style="background: rgba(96, 165, 250, 1)"></div>
+                    <span>Max</span>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>📝 Assignments</h2>
+            <div class="assignments-container">
+                <div class="assignments-list" id="assignmentsList"></div>
+                <div id="assignmentDetail" class="assignment-detail" style="display: none;">
+                    <button class="back-btn" onclick="backToAssignmentsList()">← Back</button>
+                    <div id="assignmentContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Code Snippets Slideshow Section -->
+        <div class="section">
+            <h2>🎯 Code Leer-Slideshow</h2>
+            <div class="slideshow-container">
+                <div class="slideshow-controls">
+                    <button class="slideshow-btn" onclick="previousSlide()">‹ Vorige</button>
+                    <span class="slide-counter" id="slideCounter">0 / 0</span>
+                    <button class="slideshow-btn" onclick="nextSlide()">Volgende ›</button>
+                    <button class="slideshow-btn primary" onclick="toggleSlideshow()" id="slideshowToggle">▶️ Start</button>
+                </div>
+                
+                <div class="slideshow-viewer" id="slideshowViewer" style="display: none;">
+                    <div class="slide" id="currentSlide">
+                        <div class="slide-header">
+                            <h3 id="slideTitle">Loading...</h3>
+                            <span class="slide-language" id="slideLanguage"></span>
+                        </div>
+                        <div class="slide-content">
+                            <div class="slide-code">
+                                <pre><code id="slideCode">// Selecteer code en gebruik /add-slide om toe te voegen</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="slideshow-empty" id="slideshowEmpty">
+                    <div class="empty-state">
+                        <span class="empty-icon">📂</span>
+                        <h3>Geen slides beschikbaar</h3>
+                        <p>Highlight code in VS Code en gebruik <code>/add-slide</code> om je eerste slide toe te voegen!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <!-- TEACHER DASHBOARD VIEW -->
+    <div class="container" id="teacherView" style="display: none;">
+        <section class="teacher-section">
+            <h2>📊 Class Analytics</h2>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="icon">👥</div><div class="value" id="classStudentCount">0</div><div class="label">Studenten</div></div>
+                <div class="stat-card"><div class="icon">📈</div><div class="value" id="classAvgProgress">0%</div><div class="label">Gem. Progress</div></div>
+                <div class="stat-card"><div class="icon">💬</div><div class="value" id="classTotalCommands">0</div><div class="label">Totaal Commands</div></div>
+                <div class="stat-card"><div class="icon">🎯</div><div class="value" id="classEngagement">0%</div><div class="label">Engagement</div></div>
+            </div>
+        </section>
+
+        <div class="grid-2">
+            <section class="teacher-section">
+                <h2>⚠️ Early Warnings</h2>
+                <div id="warningsList" class="warnings-list">
+                    <div class="no-data">Alle studenten hebben een goed voortgang 🎉</div>
+                </div>
+            </section>
+
+            <section class="teacher-section">
+                <h2>📚 Year Level Distribution</h2>
+                <div id="yearLevelChart" class="chart-wrapper">
+                    <canvas id="yearLevelDistributionChart"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <section class="teacher-section">
+            <h2>👥 Student List & Performance</h2>
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Year Level</th>
+                            <th>Interactions</th>
+                            <th>Avg Progress</th>
+                            <th>Command Freq</th>
+                            <th>Status</th>
+                            <th>Top Topic</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <tr><td colspan="7" class="no-data">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="teacher-section">
+            <h2>📊 Command Usage Heatmap</h2>
+            <div id="commandHeatmap" class="command-heatmap-container"></div>
+        </section>
+
+        <!-- LIVE CODE DEMO SECTION -->
+        <section class="teacher-section">
+            <h2>🎬 Live Code Demo</h2>
+            <p style="color: #9ca3af; margin-bottom: 16px;">Start een live demo - alle studenten zien je code in real-time</p>
+            <div class="live-demo-controls">
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <select id="demoLanguage" style="padding: 10px 16px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #e5e7eb; border-radius: 8px; font-size: 14px;">
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                    </select>
+                    <input type="text" id="demoTitle" placeholder="Demo titel (bijv: For Loops uitleg)" 
+                        style="flex: 1; min-width: 200px; padding: 10px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e5e7eb; border-radius: 8px; font-size: 14px;">
+                    <button onclick="startLiveDemo()" id="startDemoBtn" style="padding: 10px 20px; background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <span>▶️</span> Start Demo
+                    </button>
+                    <button onclick="stopLiveDemo()" id="stopDemoBtn" style="display: none; padding: 10px 20px; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        ⏹️ Stop Demo
+                    </button>
+                </div>
+                <div id="liveDemoStatus" style="display: none; padding: 16px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="live-indicator" style="width: 12px; height: 12px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                        <span style="color: #22c55e; font-weight: 600;">LIVE - Studenten zien je nu coderen</span>
+                        <span id="demoViewerCount" style="margin-left: auto; color: #9ca3af;">👀 0 kijkers</span>
+                    </div>
+                </div>
+                <div id="liveDemoPreview" style="display: none;">
+                    <div style="background: #1e1e1e; border-radius: 8px; overflow: hidden;">
+                        <div style="background: #2d2d2d; padding: 8px 16px; display: flex; align-items: center; gap: 8px;">
+                            <span style="width: 12px; height: 12px; background: #ff5f56; border-radius: 50%;"></span>
+                            <span style="width: 12px; height: 12px; background: #ffbd2e; border-radius: 50%;"></span>
+                            <span style="width: 12px; height: 12px; background: #27ca40; border-radius: 50%;"></span>
+                            <span id="demoFileName" style="margin-left: 12px; color: #9ca3af; font-size: 13px;">demo.js</span>
+                        </div>
+                        <pre id="demoCodePreview" style="padding: 16px; margin: 0; font-family: 'Fira Code', monospace; font-size: 14px; color: #d4d4d4; max-height: 300px; overflow-y: auto;"><code>// Je code verschijnt hier tijdens de demo...</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTELLIGENT CODE COMMENTS SECTION -->
+        <section class="teacher-section">
+            <h2>💡 Intelligent Code Comments</h2>
+            <p style="color: #9ca3af; margin-bottom: 16px;">Voeg automatisch educatieve comments toe aan student code</p>
+            <div class="code-comments-controls">
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <select id="commentTarget" style="padding: 10px 16px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); color: #e5e7eb; border-radius: 8px; font-size: 14px;">
+                        <option value="all">Alle studenten</option>
+                        <option value="struggling">Alleen studenten die struggelen</option>
+                        <option value="selected">Geselecteerde student</option>
+                    </select>
+                    <select id="commentStudentSelect" style="display: none; padding: 10px 16px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); color: #e5e7eb; border-radius: 8px; font-size: 14px;">
+                        <option value="">Selecteer student...</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="color: #e5e7eb; font-weight: 500; margin-bottom: 8px; display: block;">Comment Types:</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; cursor: pointer;">
+                            <input type="checkbox" id="commentLogic" checked style="accent-color: #a855f7;"> 
+                            <span style="color: #d4d4d4;">🧠 Explain Logic</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; cursor: pointer;">
+                            <input type="checkbox" id="commentBestPractices" checked style="accent-color: #a855f7;"> 
+                            <span style="color: #d4d4d4;">✨ Best Practices</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; cursor: pointer;">
+                            <input type="checkbox" id="commentBugs" style="accent-color: #a855f7;"> 
+                            <span style="color: #d4d4d4;">🐛 Potential Bugs</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; cursor: pointer;">
+                            <input type="checkbox" id="commentOptimization" style="accent-color: #a855f7;"> 
+                            <span style="color: #d4d4d4;">⚡ Optimizations</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 6px; cursor: pointer;">
+                            <input type="checkbox" id="commentEncouragement" checked style="accent-color: #a855f7;"> 
+                            <span style="color: #d4d4d4;">💪 Encouragement</span>
+                        </label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button onclick="addIntelligentComments()" style="padding: 12px 24px; background: linear-gradient(135deg, #a855f7, #8b5cf6); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <span>💡</span> Add Comments to Active File
+                    </button>
+                    <button onclick="previewComments()" style="padding: 12px 24px; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        👁️ Preview First
+                    </button>
+                    <button onclick="removeAllComments()" style="padding: 12px 24px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        🗑️ Remove AI Comments
+                    </button>
+                </div>
+                <div id="commentPreviewBox" style="display: none; margin-top: 16px; padding: 16px; background: #1e1e1e; border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3);">
+                    <h4 style="color: #a855f7; margin: 0 0 12px 0;">Preview - Comments to be added:</h4>
+                    <pre id="commentPreviewCode" style="font-family: 'Fira Code', monospace; font-size: 13px; color: #d4d4d4; margin: 0; overflow-x: auto;"></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- BROADCAST MESSAGE SECTION -->
+        <section class="teacher-section">
+            <h2>📢 Broadcast Message</h2>
+            <p style="color: #9ca3af; margin-bottom: 16px;">Stuur een bericht naar alle studenten in hun editor</p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <input type="text" id="broadcastMessage" placeholder="Typ je bericht hier..." 
+                    style="flex: 1; min-width: 300px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e5e7eb; border-radius: 8px; font-size: 14px;">
+                <select id="broadcastType" style="padding: 12px 16px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #e5e7eb; border-radius: 8px;">
+                    <option value="info">ℹ️ Info</option>
+                    <option value="warning">⚠️ Warning</option>
+                    <option value="success">✅ Success</option>
+                    <option value="urgent">🚨 Urgent</option>
+                </select>
+                <button onclick="broadcastToStudents()" style="padding: 12px 24px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    📤 Send to All
+                </button>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        let progressChart = null;
+        let currentChartType = 'month';
+        let currentMode = 'student';
+        let yearLevelChart = null;
+        let liveDemoActive = false;
+        let liveDemoInterval = null;
+        let completedAssignments = {}; // Initialize global state for completed assignments
+        window.completedAssignments = completedAssignments;
+        
+        // Mode switching - defined first so onclick handlers work
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('studentModeBtn').classList.toggle('active', mode === 'student');
+            document.getElementById('teacherModeBtn').classList.toggle('active', mode === 'teacher');
+            document.getElementById('studentView').style.display = mode === 'student' ? '' : 'none';
+            document.getElementById('teacherView').style.display = mode === 'teacher' ? '' : 'none';
+            document.getElementById('headerSubtitle').textContent = 
+                mode === 'student' ? 'Volg je voortgang en ontgrendel achievements' : 'Monitor student progress and performance';
+            if (mode === 'teacher') {
+                loadTeacherData();
+            }
+        }
+        
+        const achievements = [
+            { id: 'first_step', icon: '👶', name: 'Eerste Stap', description: 'Eerste interactie', threshold: 1 },
+            { id: 'active_student', icon: '🥉', name: 'Actieve Student', description: '20 interacties', threshold: 20 },
+            { id: 'dedicated', icon: '🥈', name: 'Gevorderde', description: '50 interacties', threshold: 50 },
+            { id: 'master', icon: '🏆', name: 'Code Meester', description: '100 interacties', threshold: 100 },
+            { id: 'debugger', icon: '🐛', name: 'Bug Hunter', description: '10x /debug', command: 'debug', threshold: 10 },
+            { id: 'reviewer', icon: '👀', name: 'Reviewer', description: '10x /review', command: 'review', threshold: 10 },
+            { id: 'learner', icon: '📚', name: 'Leerling', description: '10x /explain', command: 'explain', threshold: 10 },
+            { id: 'quiz_master', icon: '🧠', name: 'Quiz Master', description: '20x /quiz', command: 'quiz', threshold: 20 },
+            { id: 'exerciser', icon: '💪', name: 'Oefenaar', description: '15x /exercise', command: 'exercise', threshold: 15 },
+            { id: 'all_rounder', icon: '🌟', name: 'All-Rounder', description: 'Alle commands', special: 'all_commands' },
+        ];
+        const badges = [
+            { id: 'newcomer', icon: '🌱', name: 'Newcomer', unlocked: (d,t) => t >= 1 },
+            { id: 'bronze', icon: '🥉', name: 'Bronze', unlocked: (d,t) => t >= 20 },
+            { id: 'silver', icon: '🥈', name: 'Silver', unlocked: (d,t) => t >= 50 },
+            { id: 'gold', icon: '🥇', name: 'Gold', unlocked: (d,t) => t >= 100 },
+            { id: 'debugger', icon: '🐛', name: 'Debugger', unlocked: d => (d.debug||0) >= 10 },
+            { id: 'scholar', icon: '📚', name: 'Scholar', unlocked: d => (d.explain||0) >= 10 },
+            { id: 'reviewer', icon: '👁️', name: 'Reviewer', unlocked: d => (d.review||0) >= 10 },
+            { id: 'quizzer', icon: '🧠', name: 'Quizzer', unlocked: d => (d.quiz||0) >= 20 },
+            { id: 'athlete', icon: '💪', name: 'Athlete', unlocked: d => (d.exercise||0) >= 15 },
+            { id: 'refactorer', icon: '🔧', name: 'Refactorer', unlocked: d => (d.refactor||0) >= 10 },
+            { id: 'streak7', icon: '🔥', name: '7-Day', unlocked: (d,t,h) => (h?.streak||0) >= 7 },
+            { id: 'allstar', icon: '⭐', name: 'All-Star', unlocked: d => ['debug','review','explain','quiz','exercise','refactor','concept'].every(c => d[c] > 0) },
+        ];
+        let progressData = {};
+        let historyData = { daily: {}, streak: 0 };
+        async function fetchHistoryData() {
+            try {
+                const response = await fetch('/api/history');
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {
+                console.error('Failed to fetch history:', e);
+            }
+            return { daily: {}, streak: 0 };
+        }
+        function getSkillLevel(t) {
+            if (t >= 100) return { level: 'Expert', class: 'skill-expert', next: null, progress: 100 };
+            if (t >= 50) return { level: 'Intermediate', class: 'skill-intermediate', next: 100, progress: ((t-50)/50)*100 };
+            if (t >= 20) return { level: 'Beginner+', class: 'skill-beginner-plus', next: 50, progress: ((t-20)/30)*100 };
+            return { level: 'Beginner', class: 'skill-beginner', next: 20, progress: (t/20)*100 };
+        }
+        function isAchievementUnlocked(a, d, t) {
+            if (a.special === 'all_commands') return ['debug','review','explain','quiz','exercise','refactor','concept'].every(c => d[c] > 0);
+            if (a.command) return (d[a.command]||0) >= a.threshold;
+            return t >= a.threshold;
+        }
+        function switchChart(type) {
+            currentChartType = type;
+            document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            updateChart();
+        }
+        function updateChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            if (progressChart) progressChart.destroy();
+            let labels, data, label;
+            const today = new Date();
+            if (currentChartType === 'month') {
+                labels = []; data = [];
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date(today); d.setDate(d.getDate() - i);
+                    labels.push(d.getDate() + '/' + (d.getMonth()+1));
+                    data.push(historyData.daily[d.toISOString().split('T')[0]] || 0);
+                }
+                label = 'Interacties';
+            } else if (currentChartType === 'week') {
+                labels = []; data = [];
+                const days = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(today); d.setDate(d.getDate() - i);
+                    labels.push(days[d.getDay()]);
+                    data.push(historyData.daily[d.toISOString().split('T')[0]] || 0);
+                }
+                label = 'Interacties';
+            } else {
+                labels = Object.keys(progressData);
+                data = Object.values(progressData);
+                label = 'Gebruikt';
+            }
+            progressChart = new Chart(ctx, {
+                type: currentChartType === 'commands' ? 'doughnut' : 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label,
+                        data,
+                        borderColor: '#60a5fa',
+                        backgroundColor: currentChartType === 'commands' 
+                            ? ['#60a5fa','#a78bfa','#f472b6','#34d399','#fbbf24','#ef4444','#8b5cf6','#06b6d4']
+                            : 'rgba(96,165,250,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#60a5fa',
+                        pointRadius: currentChartType === 'commands' ? 0 : 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: currentChartType === 'commands', position: 'right', labels: { color: '#9ca3af' } } },
+                    scales: currentChartType === 'commands' ? {} : {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af', maxRotation: 45 } }
+                    }
+                }
+            });
+        }
+        function generateHeatmap() {
+            const c = document.getElementById('heatmapContainer');
+            c.innerHTML = '';
+            const today = new Date();
+            for (let w = 7; w >= 0; w--) {
+                for (let d = 0; d < 7; d++) {
+                    const date = new Date(today); date.setDate(date.getDate() - (w*7 + (6-d)));
+                    const ds = date.toISOString().split('T')[0];
+                    const count = historyData.daily[ds] || 0;
+                    let lvl = '';
+                    if (count > 0) lvl = 'level-1';
+                    if (count >= 3) lvl = 'level-2';
+                    if (count >= 6) lvl = 'level-3';
+                    if (count >= 10) lvl = 'level-4';
+                    const el = document.createElement('div');
+                    el.className = `heatmap-day ${lvl}`;
+                    el.title = `${ds}: ${count}`;
+                    c.appendChild(el);
+                }
+            }
+        }
+        function renderBadges(d, t) {
+            document.getElementById('badgesGrid').innerHTML = badges.map(b => 
+                `<div class="badge ${b.unlocked(d,t,historyData) ? '' : 'locked'}">
+                    <div class="badge-icon">${b.icon}</div>
+                    <div class="badge-name">${b.name}</div>
+                </div>`
+            ).join('');
+        }
+        function renderDashboard(d) {
+            const t = Object.values(d).reduce((a,b) => a+b, 0);
+            const skill = getSkillLevel(t);
+            document.getElementById('totalInteractions').textContent = t;
+            document.getElementById('commandsUsed').textContent = Object.keys(d).length;
+            document.getElementById('currentStreak').textContent = historyData.streak || 0;
+            const thisMonth = Object.entries(historyData.daily)
+                .filter(([date]) => { const x = new Date(date), n = new Date(); return x.getMonth() === n.getMonth() && x.getFullYear() === n.getFullYear(); })
+                .reduce((s,[,c]) => s+c, 0);
+            document.getElementById('thisMonth').textContent = thisMonth;
+            const sb = document.getElementById('skillBadge');
+            sb.textContent = skill.level;
+            sb.className = 'skill-badge ' + skill.class;
+            document.getElementById('skillProgress').style.width = skill.progress + '%';
+            document.getElementById('skillLabel').textContent = skill.next ? `${t} / ${skill.next}` : 'Max! 🎉';
+            
+            // Update year level display if available
+            if (userProfile && userProfile.yearLevel) {
+                const yearEmojis = { 1: '🌱', 2: '📈', 3: '⭐', 4: '👑' };
+                const yearNames = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year' };
+                document.getElementById('yearEmoji').textContent = yearEmojis[userProfile.yearLevel] || '📚';
+                document.getElementById('yearDisplay').textContent = yearNames[userProfile.yearLevel] || 'Not Set';
+            } else {
+                document.getElementById('yearEmoji').textContent = '📚';
+                document.getElementById('yearDisplay').textContent = 'Not Set';
+            }
+            
+            const cl = document.getElementById('commandList');
+            if (Object.keys(d).length > 0) {
+                cl.innerHTML = Object.entries(d).sort((a,b) => b[1]-a[1])
+                    .map(([c,n]) => `<div class="command-item"><span class="name">/${c}</span><span class="count">${n}x</span></div>`).join('');
+            }
+            const al = document.getElementById('achievementsList');
+            let uc = 0;
+            al.innerHTML = achievements.map(a => {
+                const u = isAchievementUnlocked(a, d, t);
+                if (u) uc++;
+                return `<div class="achievement ${u ? '' : 'locked'}"><div class="icon">${a.icon}</div><div class="info"><h3>${a.name}</h3><p>${a.description}</p></div></div>`;
+            }).join('');
+            document.getElementById('achievementsUnlocked').textContent = uc;
+            updateChart();
+            generateHeatmap();
+            renderBadges(d, t);
+        }
+        function updateConnectionStatus(c) {
+            document.getElementById('connectionStatus').innerHTML = c 
+                ? '<span style="color: #10b981;">● Live</span>' 
+                : '<span style="color: #ef4444;">● Offline</span>';
+        }
+
+        // Assignment Functions
+        async function loadAssignments() {
+            try {
+                const response = await fetch('http://localhost:51987/api/assignments');
+                if (response.ok) {
+                    const assignments = await response.json();
+                    renderAssignmentsList(assignments);
+                } else {
+                    renderAssignmentsList([]);
+                }
+            } catch (e) {
+                console.error('Failed to load assignments:', e);
+                renderAssignmentsList([]);
+            }
+        }
+
+        function renderAssignmentsList(assignments) {
+            const container = document.getElementById('assignmentsList');
+            if (assignments.length === 0) {
+                container.innerHTML = '<div class="no-assignments"><p>📚 No assignments yet</p></div>';
+                return;
+            }
+            
+            container.innerHTML = assignments.map(a => `
+                <div class="assignment-card" onclick="loadAssignmentDetail('${a.id}')">
+                    <span class="difficulty-badge ${a.difficulty}">${a.difficulty}</span>
+                    <h3>${a.title}</h3>
+                    <div class="topic">${a.topic}</div>
+                    <div class="meta">
+                        <span>${a.estimatedTime ? a.estimatedTime + ' min' : 'TBD'}</span>
+                        <span>${a.dueDate ? a.dueDate : 'No due date'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadAssignmentDetail(assignmentId) {
+            try {
+                const response = await fetch(`http://localhost:51987/api/assignments/${assignmentId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('assignmentDetail').dataset.currentAssignmentId = assignmentId;
+                    document.title = `${data.metadata.title || 'Assignment'} - Code Tutor Dashboard`;
+                    renderAssignmentDetail(data);
+                }
+            } catch (e) {
+                console.error('Failed to load assignment:', e);
+            }
+        }
+
+        function renderAssignmentDetail(data) {
+            const { metadata, content, highlight } = data;
+            const contentHtml = markdownToHtml(content);
+            
+            // Check if this assignment is already completed
+            const completedAssignments = window.completedAssignments || {};
+            const assignmentStatus = completedAssignments[data.id];
+            
+            // Update local state with highlight from server if present
+            if (highlight && !assignmentStatus?.highlight) {
+                if (!completedAssignments[data.id]) {
+                    completedAssignments[data.id] = {};
+                }
+                completedAssignments[data.id].highlight = highlight;
+                window.completedAssignments = completedAssignments;
+            }
+            
+            // Get highlight from either server response or local state
+            const currentHighlight = highlight || assignmentStatus?.highlight || '';
+            
+            const isStarted = assignmentStatus?.status === 'in-progress' || assignmentStatus?.status === 'completed';
+            const isCompleted = assignmentStatus?.status === 'completed';
+            const isGraded = assignmentStatus?.status === 'graded';
+            
+            document.getElementById('assignmentsList').style.display = 'none';
+            document.getElementById('assignmentDetail').style.display = 'block';
+            
+            let completionStatus = '';
+            if (isGraded) {
+                completionStatus = `
+                    <div style="padding: 12px; background: rgba(34, 197, 94, 0.2); border-left: 3px solid #22c55e; border-radius: 4px; margin-bottom: 16px;">
+                        <p style="margin: 0; color: #22c55e; font-weight: 500;">✅ Graded on ${new Date(assignmentStatus.completedAt).toLocaleDateString()}</p>
+                    </div>
+                `;
+            } else if (isCompleted) {
+                completionStatus = `
+                    <div style="padding: 12px; background: rgba(59, 130, 246, 0.2); border-left: 3px solid #3b82f6; border-radius: 4px; margin-bottom: 16px;">
+                        <p style="margin: 0; color: #3b82f6; font-weight: 500;">✅ Completed on ${new Date(assignmentStatus.completedAt).toLocaleDateString()}</p>
+                    </div>
+                `;
+            } else if (isStarted) {
+                completionStatus = `
+                    <div style="padding: 12px; background: rgba(245, 158, 11, 0.2); border-left: 3px solid #f59e0b; border-radius: 4px; margin-bottom: 16px;">
+                        <p style="margin: 0; color: #f59e0b; font-weight: 500;">⏳ In Progress - Started on ${new Date(assignmentStatus.startedAt).toLocaleDateString()}</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('assignmentContent').innerHTML = `
+                <h2>${metadata.title || 'Assignment'}</h2>
+                ${completionStatus}
+                <div class="metadata">
+                    <div class="metadata-item">
+                        <div class="label">Difficulty</div>
+                        <div class="value"><span class="difficulty-badge ${metadata.difficulty}">${metadata.difficulty}</span></div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="label">Topic</div>
+                        <div class="value">${metadata.topic || 'General'}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="label">Due Date</div>
+                        <div class="value">${metadata.dueDate || 'No due date'}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="label">Estimated Time</div>
+                        <div class="value">${metadata.estimatedTime ? metadata.estimatedTime + ' minutes' : 'TBD'}</div>
+                    </div>
+                </div>
+                <div class="content">${contentHtml}</div>
+                
+                <!-- Highlight/Notes Section for Tutor Feedback -->
+                <div class="highlight-section" style="margin-top: 24px; padding: 16px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span style="font-size: 18px;">💡</span>
+                        <h3 style="margin: 0; color: #a855f7; font-size: 14px; font-weight: 600;">Highlight voor de Tutor</h3>
+                    </div>
+                    <p style="margin: 0 0 12px 0; font-size: 12px; color: #9ca3af;">
+                        Plak hier code of tekst waar je feedback over wilt. De tutor ziet dit automatisch als je <code style="background: rgba(168, 85, 247, 0.2); padding: 2px 6px; border-radius: 4px;">@tutor /assignment-feedback</code> vraagt.
+                    </p>
+                    <textarea 
+                        id="highlightInput" 
+                        placeholder="Plak hier je code of beschrijf waar je hulp mee nodig hebt...&#10;&#10;Bijvoorbeeld:&#10;- Een stuk code waar je vastloopt&#10;- Een concept dat je niet begrijpt&#10;- Een foutmelding die je krijgt"
+                        style="width: 100%; min-height: 120px; padding: 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 6px; color: #e5e7eb; font-family: 'Fira Code', 'Consolas', monospace; font-size: 13px; resize: vertical; box-sizing: border-box;"
+                        onchange="saveHighlight('${data.id}')"
+                        onblur="saveHighlight('${data.id}')"
+                    >${currentHighlight}</textarea>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button onclick="saveHighlight('${data.id}')" style="padding: 8px 16px; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                            💾 Opslaan
+                        </button>
+                        <button onclick="clearHighlight('${data.id}')" style="padding: 8px 16px; background: rgba(107, 114, 128, 0.2); border: 1px solid #6b7280; color: #9ca3af; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                            🗑️ Wissen
+                        </button>
+                        <span id="highlightStatus" style="margin-left: auto; font-size: 11px; color: #6b7280; align-self: center;"></span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
+                    <button onclick="performAssignmentAction('${data.id}', 'start')" ${isStarted ? 'disabled' : ''} style="flex: 1; padding: 10px 16px; background: ${isStarted ? 'rgba(107, 114, 128, 0.2)' : 'rgba(59, 130, 246, 0.2)'}; border: 1px solid ${isStarted ? '#6b7280' : '#3b82f6'}; color: ${isStarted ? '#6b7280' : '#3b82f6'}; border-radius: 6px; cursor: ${isStarted ? 'default' : 'pointer'}; font-weight: 500; font-size: 13px;">
+                        ▶️ Start
+                    </button>
+                    <button onclick="performAssignmentAction('${data.id}', 'complete')" ${isGraded ? 'disabled' : ''} style="flex: 1; padding: 10px 16px; background: ${isGraded ? 'rgba(107, 114, 128, 0.2)' : 'rgba(34, 197, 94, 0.2)'}; border: 1px solid ${isGraded ? '#6b7280' : '#22c55e'}; color: ${isGraded ? '#6b7280' : '#22c55e'}; border-radius: 6px; cursor: ${isGraded ? 'default' : 'pointer'}; font-weight: 500; font-size: 13px;">
+                        ✅ Complete
+                    </button>
+                    <button onclick="performAssignmentAction('${data.id}', 'grade')" style="flex: 1; padding: 10px 16px; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #a855f7; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;">
+                        🏆 Grade
+                    </button>
+                    ${isGraded ? `<button onclick="deleteAssignment('${data.id}')" style="flex: 1; padding: 10px 16px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;">
+                        🗑️ Delete
+                    </button>` : ''}
+                    <button onclick="backToAssignmentsList()" style="flex: 1; padding: 10px 16px; background: rgba(107, 114, 128, 0.2); border: 1px solid #6b7280; color: #d1d5db; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;">
+                        ← Back
+                    </button>
+                </div>
+            `;
+        }
+        
+        async function performAssignmentAction(assignmentId, action) {
+            try {
+                const actionLabels = {
+                    'start': '▶️ Started',
+                    'complete': '✅ Completed',
+                    'grade': '🏆 Graded'
+                };
+
+                console.log('Performing action:', action, 'on assignment:', assignmentId);
+
+                const response = await fetch('/api/assignment-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        assignmentId: assignmentId,
+                        status: action === 'start' ? 'in-progress' : action
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Action result:', result);
+                    
+                    // Update local completion state
+                    if (!completedAssignments[assignmentId]) {
+                        completedAssignments[assignmentId] = {};
+                    }
+                    if (action === 'start') {
+                        completedAssignments[assignmentId].status = 'in-progress';
+                        completedAssignments[assignmentId].startedAt = new Date().toISOString();
+                    } else if (action === 'complete') {
+                        completedAssignments[assignmentId].status = 'completed';
+                        completedAssignments[assignmentId].completedAt = new Date().toISOString();
+                    } else if (action === 'grade') {
+                        completedAssignments[assignmentId].status = 'graded';
+                        completedAssignments[assignmentId].gradedAt = new Date().toISOString();
+                    }
+                    window.completedAssignments = completedAssignments;
+                    
+                    // Send message to chat via extension
+                    await fetch('/api/send-chat-message', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: action,
+                            assignmentId: assignmentId,
+                            status: action === 'start' ? 'in-progress' : action
+                        })
+                    }).catch(e => console.log('Chat message sent (async)'));
+                    
+                    // Reload assignment detail to show updated status, but preserve the title
+                    const currentTitle = document.title;
+                    const assignmentId_current = document.getElementById('assignmentDetail').dataset.currentAssignmentId;
+                    if (assignmentId_current) {
+                        const detailResponse = await fetch(`http://localhost:51987/api/assignments/${assignmentId_current}`);
+                        if (detailResponse.ok) {
+                            const data = await detailResponse.json();
+                            renderAssignmentDetail(data);
+                            document.title = currentTitle; // Restore title after rendering
+                        }
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Failed to perform action. Status:', response.status, 'Response:', errorText);
+                    alert('Failed to perform action: ' + response.status);
+                }
+            } catch (e) {
+                console.error('Error performing action:', e);
+                alert('Error performing action: ' + e.message);
+            }
+        }
+
+        // Save highlight/notes for an assignment
+        async function saveHighlight(assignmentId) {
+            const highlightInput = document.getElementById('highlightInput');
+            const highlightStatus = document.getElementById('highlightStatus');
+            const highlight = highlightInput?.value || '';
+            
+            try {
+                const response = await fetch('http://localhost:51987/api/save-highlight', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        assignmentId: assignmentId,
+                        highlight: highlight
+                    })
+                });
+                
+                if (response.ok) {
+                    // Update local state
+                    if (!completedAssignments[assignmentId]) {
+                        completedAssignments[assignmentId] = {};
+                    }
+                    completedAssignments[assignmentId].highlight = highlight;
+                    window.completedAssignments = completedAssignments;
+                    
+                    if (highlightStatus) {
+                        highlightStatus.textContent = '✓ Opgeslagen';
+                        highlightStatus.style.color = '#22c55e';
+                        setTimeout(() => {
+                            highlightStatus.textContent = '';
+                        }, 2000);
+                    }
+                } else {
+                    console.error('Failed to save highlight. Status:', response.status);
+                    if (highlightStatus) {
+                        highlightStatus.textContent = '✗ Fout bij opslaan';
+                        highlightStatus.style.color = '#ef4444';
+                    }
+                }
+            } catch (e) {
+                console.error('Error saving highlight:', e);
+                if (highlightStatus) {
+                    highlightStatus.textContent = '✗ Fout bij opslaan';
+                    highlightStatus.style.color = '#ef4444';
+                }
+            }
+        }
+        
+        // Clear highlight for an assignment
+        async function clearHighlight(assignmentId) {
+            const highlightInput = document.getElementById('highlightInput');
+            if (highlightInput) {
+                highlightInput.value = '';
+            }
+            await saveHighlight(assignmentId);
+        }
+
+        function backToAssignmentsList() {
+            document.title = 'Code Tutor Dashboard';
+            document.getElementById('assignmentsList').style.display = 'grid';
+            document.getElementById('assignmentDetail').style.display = 'none';
+        }
+
+        async function deleteAssignment(assignmentId) {
+            if (!confirm('Are you sure you want to delete this assignment? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:51987/api/delete-assignment/${assignmentId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Assignment deleted:', result);
+                    backToAssignmentsList();
+                    location.reload();
+                } else {
+                    const errorText = await response.text();
+                    console.error('Failed to delete assignment. Status:', response.status, 'Response:', errorText);
+                    alert('Failed to delete assignment: ' + response.status);
+                }
+            } catch (e) {
+                console.error('Error deleting assignment:', e);
+                alert('Error deleting assignment: ' + e.message);
+            }
+        }
+
+        function markdownToHtml(markdown) {
+            let html = markdown;
+            
+            // Headers
+            html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+            html = html.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+            
+            // Bold
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            
+            // Italic
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            // Code
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            
+            // Links
+            html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // Line breaks
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+            
+            // Lists
+            html = html.replace(/^\- (.*?)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>');
+            html = html.replace(/^\d+\. (.*?)$/gm, '<li>$1</li>');
+            
+            // Code blocks
+            html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // Blockquotes
+            html = html.replace(/^&gt; (.*?)$/gm, '<blockquote>$1</blockquote>');
+            
+            return html;
+        }
+
+        let userProfile = null; // Store the user profile
+        
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        function connectSSE() {
+            const es = new EventSource('/events');
+            es.onopen = () => updateConnectionStatus(true);
+            es.onmessage = async e => { 
+                try { 
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'profileUpdate' && data.userProfile) {
+                        userProfile = data.userProfile;
+                        renderDashboard(progressData);
+                    } else if (data.type === 'assignmentUpdate') {
+                        // Track assignment completion status
+                        if (!completedAssignments[data.assignmentId]) {
+                            completedAssignments[data.assignmentId] = {};
+                        }
+                        completedAssignments[data.assignmentId].status = data.status;
+                        if (data.status === 'completed') {
+                            completedAssignments[data.assignmentId].completedAt = new Date().toISOString();
+                        }
+                        window.completedAssignments = completedAssignments;
+                        
+                        // Show toast notification
+                        if (data.message) {
+                            showToast(data.message);
+                        }
+                        
+                        // Refresh the current assignment display if it's open
+                        const detailSection = document.getElementById('assignmentDetail');
+                        if (detailSection && detailSection.style.display !== 'none') {
+                            // The assignment detail is visible, reload it
+                            const assignmentId = detailSection.dataset.currentAssignmentId;
+                            if (assignmentId) {
+                                loadAssignmentDetail(assignmentId);
+                            }
+                        } else {
+                            // Assignment list is showing, refresh it to show updated status badges
+                            loadData();
+                        }
+                    } else if (data.type === 'assignmentMessage') {
+                        // Assignment message for chat feedback - no toast needed here
+                        // Toast is already shown from assignmentUpdate event
+                    } else if (data.type === 'assignmentDeleted') {
+                        // Remove deleted assignment from tracking
+                        if (completedAssignments[data.assignmentId]) {
+                            delete completedAssignments[data.assignmentId];
+                            window.completedAssignments = completedAssignments;
+                        }
+                        // Refresh the assignments list
+                        loadData();
+                        // If we were viewing the deleted assignment, go back to list
+                        const detailSection = document.getElementById('assignmentDetail');
+                        if (detailSection && detailSection.style.display !== 'none') {
+                            const assignmentId = detailSection.dataset.currentAssignmentId;
+                            if (assignmentId === data.assignmentId) {
+                                backToAssignmentsList();
+                            }
+                        }
+                    } else if (data.type === 'assignmentGenerated') {
+                        // New assignment was created, reload the list
+                        loadData();
+                    } else {
+                        progressData = data;
+                        historyData = await fetchHistoryData();
+                        renderDashboard(progressData);
+                    }
+                } catch(e) { 
+                    console.error('SSE Error:', e);
+                } 
+            };
+            es.onerror = () => { updateConnectionStatus(false); es.close(); setTimeout(connectSSE, 3000); };
+        }
+        async function loadData() {
+            // Fetch both progress and history data
+            try {
+                const [progressResponse, historyResponse, assignmentStatusResponse] = await Promise.all([
+                    fetch('/api/progress'),
+                    fetch('/api/history'),
+                    fetch('/api/assignment-status')
+                ]);
+                if (progressResponse.ok) {
+                    progressData = await progressResponse.json();
+                }
+                if (historyResponse.ok) {
+                    historyData = await historyResponse.json();
+                }
+                if (assignmentStatusResponse.ok) {
+                    completedAssignments = await assignmentStatusResponse.json();
+                    window.completedAssignments = completedAssignments;
+                }
+            } catch (e) {
+                console.error('Failed to load data:', e);
+                progressData = {};
+                historyData = { daily: {}, streak: 0 };
+            }
+            renderDashboard(progressData);
+            loadAssignments();
+        }
+        loadData();
+        connectSSE();
+
+        // Teacher Dashboard Functions
+        async function loadTeacherData() {
+            try {
+                const response = await fetch('/api/teacher/dashboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    renderTeacherDashboard(data);
+                }
+            } catch (e) {
+                console.error('Failed to load teacher data:', e);
+            }
+        }
+
+        function renderTeacherDashboard(data) {
+            const { classStats, students, warnings } = data;
+            
+            // Update class stats
+            document.getElementById('classStudentCount').textContent = classStats.totalStudents;
+            document.getElementById('classAvgProgress').textContent = (classStats.averageProgress || 0) + '%';
+            document.getElementById('classTotalCommands').textContent = classStats.totalCommandsUsed || 0;
+            document.getElementById('classEngagement').textContent = Math.round((classStats.avgCommandsPerStudent || 0) * 10) + '%';
+            
+            // Render warnings
+            renderWarnings(warnings);
+            
+            // Render student table
+            renderStudentTable(students);
+            
+            // Render year level distribution
+            renderYearLevelChart(classStats.yearLevelBreakdown);
+            
+            // Render command heatmap
+            renderCommandHeatmap(classStats.commandFrequency);
+        }
+
+        function renderWarnings(warnings) {
+            const wl = document.getElementById('warningsList');
+            if (warnings.length === 0) {
+                wl.innerHTML = '<div class="no-data">Alle studenten hebben een goed voortgang 🎉</div>';
+                return;
+            }
+            wl.innerHTML = warnings.map(w => {
+                const severity = w.severity || 'low';
+                return `
+                    <div class="warning-item ${severity}">
+                        <div class="warning-text">
+                            <div class="student-name">${w.studentId}</div>
+                            <div class="warning-reason">${w.message}</div>
+                        </div>
+                        <div class="warning-badge">${severity.toUpperCase()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderStudentTable(students) {
+            const tbody = document.getElementById('studentTableBody');
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-data">No students found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = students.map(s => {
+                const topCommand = Object.entries(s.commandUsage || {}).sort((a,b) => b[1]-a[1])[0];
+                return `
+                <tr>
+                    <td><strong>${s.studentName || s.id}</strong></td>
+                    <td>${s.yearLevel}${getYearSuffix(s.yearLevel)}</td>
+                    <td>${s.totalInteractions}</td>
+                    <td>${Math.round((s.totalInteractions / 10) * 100) / 100}%</td>
+                    <td>${Object.values(s.commandUsage || {}).reduce((a,b) => a+b, 0)}x</td>
+                    <td><span class="student-status ${s.engagementStatus}">${s.engagementStatus}</span></td>
+                    <td>${topCommand ? topCommand[0] : '-'}</td>
+                </tr>
+            `;
+            }).join('');
+        }
+
+        function getYearSuffix(year) {
+            const suffixes = { 1: 'st', 2: 'nd', 3: 'rd', 4: 'th' };
+            return suffixes[year] || 'th';
+        }
+
+        function renderYearLevelChart(breakdown) {
+            const ctx = document.getElementById('yearLevelDistributionChart');
+            if (!ctx) return;
+            
+            if (yearLevelChart) yearLevelChart.destroy();
+            
+            const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+            const counts = [
+                breakdown['1'] || 0,
+                breakdown['2'] || 0,
+                breakdown['3'] || 0,
+                breakdown['4'] || 0
+            ];
+            
+            yearLevelChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Number of Students',
+                        data: counts,
+                        backgroundColor: ['#60a5fa', '#a78bfa', '#f472b6', '#34d399'],
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+
+        function renderCommandHeatmap(commandUsage) {
+            const container = document.getElementById('commandHeatmap');
+            const commands = ['debug', 'review', 'explain', 'quiz', 'exercise', 'refactor', 'concept'];
+            
+            container.innerHTML = commands.map(cmd => {
+                const count = commandUsage[cmd] || 0;
+                const intensity = Math.min(count / 50, 1); // Normalize to 0-1
+                return `<div class="command-heatmap-cell command-${cmd}" title="${cmd}: ${count}" style="opacity: ${0.3 + intensity * 0.7}">${count}</div>`;
+            }).join('');
+        }
+
+        // ========== LIVE CODE DEMO FUNCTIONS ==========
+        async function startLiveDemo() {
+            const title = document.getElementById('demoTitle').value || 'Live Code Demo';
+            const language = document.getElementById('demoLanguage').value;
+            
+            try {
+                const response = await fetch('/api/teacher/live-demo/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, language })
+                });
+                
+                if (response.ok) {
+                    liveDemoActive = true;
+                    document.getElementById('startDemoBtn').style.display = 'none';
+                    document.getElementById('stopDemoBtn').style.display = 'inline-flex';
+                    document.getElementById('liveDemoStatus').style.display = 'block';
+                    document.getElementById('liveDemoPreview').style.display = 'block';
+                    document.getElementById('demoFileName').textContent = `demo.${getExtension(language)}`;
+                    
+                    // Start polling for code updates
+                    liveDemoInterval = setInterval(updateDemoPreview, 500);
+                    
+                    showToast('🎬 Live demo started! Students can now see your code.', 'success');
+                }
+            } catch (e) {
+                showToast('Failed to start live demo', 'error');
+            }
+        }
+
+        async function stopLiveDemo() {
+            try {
+                await fetch('/api/teacher/live-demo/stop', { method: 'POST' });
+                
+                liveDemoActive = false;
+                document.getElementById('startDemoBtn').style.display = 'inline-flex';
+                document.getElementById('stopDemoBtn').style.display = 'none';
+                document.getElementById('liveDemoStatus').style.display = 'none';
+                document.getElementById('liveDemoPreview').style.display = 'none';
+                
+                if (liveDemoInterval) {
+                    clearInterval(liveDemoInterval);
+                    liveDemoInterval = null;
+                }
+                
+                showToast('⏹️ Live demo stopped', 'info');
+            } catch (e) {
+                showToast('Failed to stop live demo', 'error');
+            }
+        }
+
+        async function updateDemoPreview() {
+            if (!liveDemoActive) return;
+            
+            try {
+                const response = await fetch('/api/teacher/live-demo/current');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('demoCodePreview').innerHTML = `<code>${escapeHtml(data.code || '// No code yet...')}</code>`;
+                    document.getElementById('demoViewerCount').textContent = `👀 ${data.viewerCount || 0} kijkers`;
+                }
+            } catch (e) {
+                // Silent fail - keep polling
+            }
+        }
+
+        function getExtension(language) {
+            const extensions = { javascript: 'js', python: 'py', typescript: 'ts', html: 'html', css: 'css' };
+            return extensions[language] || 'txt';
+        }
+
+        // ========== INTELLIGENT CODE COMMENTS FUNCTIONS ==========
+        document.getElementById('commentTarget').addEventListener('change', function() {
+            const studentSelect = document.getElementById('commentStudentSelect');
+            studentSelect.style.display = this.value === 'selected' ? 'inline-block' : 'none';
+            if (this.value === 'selected') {
+                loadStudentList();
+            }
+        });
+
+        async function loadStudentList() {
+            try {
+                const response = await fetch('/api/teacher/dashboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    const select = document.getElementById('commentStudentSelect');
+                    select.innerHTML = '<option value="">Selecteer student...</option>' + 
+                        data.students.map(s => `<option value="${s.id}">${s.studentName || s.id}</option>`).join('');
+                }
+            } catch (e) {
+                console.error('Failed to load students:', e);
+            }
+        }
+
+        async function addIntelligentComments() {
+            const commentTypes = [];
+            if (document.getElementById('commentLogic').checked) commentTypes.push('explain-logic');
+            if (document.getElementById('commentBestPractices').checked) commentTypes.push('best-practices');
+            if (document.getElementById('commentBugs').checked) commentTypes.push('potential-bugs');
+            if (document.getElementById('commentOptimization').checked) commentTypes.push('optimization');
+            if (document.getElementById('commentEncouragement').checked) commentTypes.push('encouragement');
+
+            const target = document.getElementById('commentTarget').value;
+            const studentId = target === 'selected' ? document.getElementById('commentStudentSelect').value : null;
+
+            try {
+                showToast('💡 Analyzing code and adding comments...', 'info');
+                
+                const response = await fetch('/api/teacher/add-smart-comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target,
+                        studentId,
+                        commentTypes,
+                        showInEditor: true
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast(`✅ Added ${result.commentsAdded || 0} intelligent comments!`, 'success');
+                } else {
+                    showToast('Failed to add comments', 'error');
+                }
+            } catch (e) {
+                showToast('Error adding comments: ' + e.message, 'error');
+            }
+        }
+
+        async function previewComments() {
+            const commentTypes = [];
+            if (document.getElementById('commentLogic').checked) commentTypes.push('explain-logic');
+            if (document.getElementById('commentBestPractices').checked) commentTypes.push('best-practices');
+            if (document.getElementById('commentBugs').checked) commentTypes.push('potential-bugs');
+            if (document.getElementById('commentOptimization').checked) commentTypes.push('optimization');
+            if (document.getElementById('commentEncouragement').checked) commentTypes.push('encouragement');
+
+            try {
+                showToast('👁️ Generating preview...', 'info');
+                
+                const response = await fetch('/api/teacher/preview-comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commentTypes })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('commentPreviewCode').textContent = result.preview || '// No preview available';
+                    document.getElementById('commentPreviewBox').style.display = 'block';
+                }
+            } catch (e) {
+                showToast('Error generating preview', 'error');
+            }
+        }
+
+        async function removeAllComments() {
+            if (!confirm('Are you sure you want to remove all AI-generated comments from the active file?')) return;
+            
+            try {
+                const response = await fetch('/api/teacher/remove-comments', { method: 'POST' });
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast(`🗑️ Removed ${result.removed || 0} AI comments`, 'success');
+                    document.getElementById('commentPreviewBox').style.display = 'none';
+                }
+            } catch (e) {
+                showToast('Error removing comments', 'error');
+            }
+        }
+
+        // ========== BROADCAST MESSAGE FUNCTIONS ==========
+        async function broadcastToStudents() {
+            const message = document.getElementById('broadcastMessage').value;
+            const type = document.getElementById('broadcastType').value;
+            
+            if (!message.trim()) {
+                showToast('Please enter a message', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/teacher/broadcast', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, type })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast(`📤 Message sent to ${result.recipientCount || 'all'} students!`, 'success');
+                    document.getElementById('broadcastMessage').value = '';
+                }
+            } catch (e) {
+                showToast('Failed to send broadcast', 'error');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize with mode selector
+        function initializeModeSelector() {
+            const btn = document.getElementById('studentModeBtn');
+            if (btn) {
+                btn.classList.add('active');
+            }
+            
+            // Initialize highlight selection
+            initializeHighlightSelection();
+            
+            // Initialize sticky note dragging
+            initializeStickyDragging();
+        }
+
+        // Draggable Sticky Note
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let lastSelectedText = '';
+        let cachedExplanation = ''; // Cache voor uitleggen
+        let explanationCache = {}; // Cache alle uitleggen
+
+        function initializeStickyDragging() {
+            const sticky = document.getElementById('explanationSticky');
+            const header = document.getElementById('stickyHeader');
+            
+            if (!header) return;
+            
+            header.addEventListener('mousedown', (e) => {
+                if (e.target.classList.contains('sticky-note-btn')) return;
+                
+                isDragging = true;
+                const rect = sticky.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                sticky.style.transition = 'none';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging || !sticky.style.display || sticky.style.display === 'none') return;
+                
+                let newX = e.clientX - dragOffset.x;
+                let newY = e.clientY - dragOffset.y;
+                
+                // Keep within viewport
+                newX = Math.max(0, Math.min(newX, window.innerWidth - sticky.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - sticky.offsetHeight));
+                
+                sticky.style.position = 'fixed';
+                sticky.style.left = newX + 'px';
+                sticky.style.top = newY + 'px';
+                sticky.style.right = 'auto';
+                sticky.style.bottom = 'auto';
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    const sticky = document.getElementById('explanationSticky');
+                    sticky.style.transition = 'all 0.2s ease-out';
+                }
+            });
+        }
+
+        // Highlight & Explanation Feature
+        function initializeHighlightSelection() {
+            document.addEventListener('mouseup', () => {
+                // Niet triggeren als we aan het slepen zijn
+                if (isDragging) return;
+                
+                const selectedText = window.getSelection().toString().trim();
+                
+                // Alleen triggeren als werkelijk NIEUWE tekst geselecteerd is
+                if (selectedText && selectedText.length > 2 && selectedText !== lastSelectedText) {
+                    lastSelectedText = selectedText;
+                    openExplanation(selectedText);
+                }
+            });
+        }
+
+        async function openExplanation(text) {
+            const sticky = document.getElementById('explanationSticky');
+            sticky.style.display = 'flex';
+            sticky.classList.remove('minimized');
+            
+            // Check cache eerst
+            if (explanationCache[text]) {
+                showExplanationContent(text, explanationCache[text]);
+                return;
+            }
+            
+            document.getElementById('explanationTitle').textContent = '💡 Laden...';
+            document.getElementById('explanationContent').innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>AI denkt na over: "${text.substring(0, 40)}${text.length > 40 ? '...' : ''}"</p>
+                </div>
+            `;
+            document.getElementById('generateMoreBtn').style.display = 'none';
+            
+            try {
+                const explanation = await generateExplanation(text);
+                explanationCache[text] = explanation; // Cache het
+                showExplanationContent(text, explanation);
+            } catch (error) {
+                showExplanationError(error);
+            }
+        }
+
+        async function generateExplanation(text) {
+            try {
+                // Stuur request naar backend/prompt-server
+                const response = await fetch('http://localhost:3001/api/explain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        context: 'dashboard',
+                        userLevel: document.getElementById('skillBadge')?.textContent || 'Beginner'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.explanation || data.message;
+            } catch (error) {
+                console.error('Explanation API error:', error);
+                // Fallback: generieke uitleg
+                return generateFallbackExplanation(text);
+            }
+        }
+
+        function generateFallbackExplanation(text) {
+            // Uitgebreide uitleggen met meer detail voor studenten
+            const explanations = {
+                // Data types
+                'int': '<p><strong>int (Integer)</strong> - Geheel getal zonder decimalen</p><p>Een integer is een geheel getal dat geen kommawaarden heeft. Dit zijn getallen zoals -5, 0, 42 of 1000.</p><ul><li><strong>Voorbeelden:</strong> -5, 0, 42, 1000, -99999</li><li><strong>Gebruikt voor:</strong> Tellen, indexeren van arrays, IDs, leeftijden, hoeveelheden</li><li><strong>In JavaScript:</strong> JavaScript onderscheid int niet, alle getallen zijn floats</li><li><strong>Bereik:</strong> Afhankelijk van de taal (32-bit: -2,147,483,648 tot 2,147,483,647)</li><li><strong>Performance:</strong> Sneller dan floats in sommige berekeningen</li></ul>',
+                'string': '<p><strong>string</strong> - Tekst/karakters tussen quotes</p><p>Een string is een reeks karakters (letters, nummers, symbolen) die tussen aanhalingstekens staan.</p><ul><li><strong>Voorbeelden:</strong> "Hello", \'world\', `Hallo ${naam}`</li><li><strong>Soorten quotes:</strong> Double (""), single (\'\'), backticks (``) voor template literals</li><li><strong>Onveranderlijk:</strong> Strings kunnen niet direct gewijzigd, je maakt een nieuw</li><li><strong>Methodes:</strong> .length, .charAt(), .substring(), .split(), .toUpperCase()</li><li><strong>Concatenation:</strong> "Hello" + " " + "World" = "Hello World"</li></ul>',
+                'boolean': '<p><strong>boolean</strong> - Waarheidswaarde: true of false</p><p>Een boolean kan maar twee waarden hebben: true (waar) of false (onwaar). Essentieel voor beslissingen in code.</p><ul><li><strong>Waarden:</strong> Slechts true of false</li><li><strong>Gebruikt in:</strong> if statements, loops, voorwaarden</li><li><strong>Logische operatoren:</strong> && (en), || (of), ! (niet)</li><li><strong>Vergelijkingen:</strong> === (gelijk), !== (niet gelijk), < (kleiner), > (groter)</li><li><strong>Voorbeeld:</strong> if (leeftijd >= 18) { console.log("Volwassen"); }</li></ul>',
+                'float': '<p><strong>float</strong> - Decimaal getal met floating point</p><p>Een float (floating point) is een getal met decimalen. Gebruikt voor nauwkeurige berekeningen.</p><ul><li><strong>Voorbeelden:</strong> 3.14, -2.5, 0.001, 99.99</li><li><strong>Gebruikt voor:</strong> Berekeningen, coördinaten, percentages, prijzen</li><li><strong>Precisie:</strong> Kan afrondingsfouten hebben (0.1 + 0.2 !== 0.3!)</li><li><strong>Groter bereik:</strong> Dan integers maar minder nauwkeurig</li><li><strong>In JavaScript:</strong> Alle getallen zijn floats, ook "integers"</li></ul>',
+                'array': '<p><strong>Array</strong> - Geordende verzameling van waardes</p><p>Een array is een lijst van items (waarden) die achter elkaar staan. Heel nuttig om meerdere items samen te houden.</p><ul><li><strong>Syntax:</strong> [1, 2, 3] of [\'a\', \'b\', \'c\']</li><li><strong>Index:</strong> Begint bij 0 (eerste element = index 0)</li><li><strong>Voorbeeld:</strong> const fruiten = [\'appel\', \'banaan\', \'kers\']; fruiten[0] = \'appel\'</li><li><strong>Methodes:</strong> .push() (toevoegen), .pop() (verwijderen), .map() (transformeren), .filter() (filteren)</li><li><strong>Lengte:</strong> fruiten.length = 3</li></ul>',
+                'object': '<p><strong>Object</strong> - Verzameling van key-value pairs</p><p>Een object is een verzameling van gegevens met labels (keys). Perfect voor het groeperen van gerelateerde informatie.</p><ul><li><strong>Syntax:</strong> { name: "John", age: 30, city: "Amsterdam" }</li><li><strong>Toegang:</strong> obj.name of obj["name"]</li><li><strong>Voorbeeld:</strong> const student = { naam: "Anna", klas: "2A", cijfer: 8.5 };</li><li><strong>Nested:</strong> Kan objects binnen objects bevatten</li><li><strong>Basis van:</strong> JSON format, APIs</li></ul>',
+                
+                // Keywords
+                'if': '<p><strong>if statement</strong> - Voorwaardelijk uitvoering</p><p>Met if zeg je tegen je code: "Voer dit uit ALLEEN ALS deze voorwaarde waar is".</p><ul><li><strong>Syntax:</strong> if (voorwaarde) { code die uitgevoerd wordt }</li><li><strong>Voorbeeld:</strong> if (leeftijd > 18) { console.log("Volwassen"); }</li><li><strong>Optional:</strong> else if en else voor andere scenario\'s</li><li><strong>Meerdere:</strong> if...else if...else if...else</li><li><strong>Evaluatie:</strong> Voorwaarde moet boolean (true/false) zijn</li></ul>',
+                'for': '<p><strong>for loop</strong> - Herhaalt code vastgesteld aantal keer</p><p>Een for loop laat code hetzelfde aantal keer achter elkaar uitvoeren.</p><ul><li><strong>Syntax:</strong> for (let i=0; i<10; i++) { console.log(i); }</li><li><strong>3 delen:</strong> Initialisatie (i=0), voorwaarde (i<10), increment (i++)</li><li><strong>Voorbeeld:</strong> Tel van 1 tot 10</li><li><strong>Met arrays:</strong> for (let i=0; i<array.length; i++) { console.log(array[i]); }</li><li><strong>Performant:</strong> Zeer snel voor grote hoeveelheden</li></ul>',
+                'while': '<p><strong>while loop</strong> - Herhaalt totdat voorwaarde false is</p><p>Een while loop herhaalt zolang een voorwaarde waar blijft. Handig als je niet weet hoe vaak.</p><ul><li><strong>Syntax:</strong> while (voorwaarde) { code }</li><li><strong>Onbekend aantal:</strong> Herhaalt totdat voorwaarde false wordt</li><li><strong>Voorbeeld:</strong> while (aantal < 5) { aantal++; }</li><li><strong>Risk:</strong> Infinite loop mogelijk! (zorg dat voorwaarde uiteindelijk false wordt)</li><li><strong>Breek:</strong> Gebruik break om voortijdig uit te gaan</li></ul>',
+                'function': '<p><strong>function</strong> - Herbruikbare blok code</p><p>Een function laat je code eenmalig schrijven en meerdere keren gebruiken. Scheelt veel werk!</p><ul><li><strong>Defineer:</strong> function greet(naam) { console.log("Hallo " + naam); }</li><li><strong>Arrow:</strong> const greet = (naam) => { console.log("Hallo " + naam); }</li><li><strong>Parameters:</strong> Invoer waarden - function greet(naam) { }</li><li><strong>Return:</strong> Output waarden - return naam.toUpperCase()</li><li><strong>Oproepen:</strong> greet("Anna")</li></ul>',
+                'const': '<p><strong>const</strong> - Constante, onveranderlijke variabele</p><p>const maakt een variabele die NA het aanmaken niet meer kan veranderen.</p><ul><li><strong>Moet geïntialiseerd:</strong> Bij declaratie direct waarde geven</li><li><strong>Kan niet:</strong> Niet opnieuw toewijzen - const x = 5; x = 10; ❌</li><li><strong>Voorkeur:</strong> Gebruik const als standaard!</li><li><strong>Block scoped:</strong> Alleen beschikbaar in { }</li><li><strong>Voorbeeld:</strong> const PI = 3.14159;</li></ul>',
+                'let': '<p><strong>let</strong> - Block scoped variabele (Modern - ES6)</strong></p><p>let maakt een variabele die JE WEL opnieuw kan veranderen, maar alleen in zijn block.</p><ul><li><strong>Kan veranderen:</strong> let x = 5; x = 10; ✅</li><li><strong>Preferentie:</strong> Over var (oudere manier)</li><li><strong>Block scoped:</strong> Alleen in { } blok beschikbaar</li><li><strong>Geen hoisting:</strong> Geen rare fouten zoals met var</li><li><strong>Voorbeeld:</strong> let teller = 0; teller++;</li></ul>',
+                'var': '<p><strong>var</strong> - Variabele (Oudere JavaScript)</p><p>var werkt als let maar heeft wat vreemde gedrag (hoisting). Beter: gebruik let/const!</p><ul><li><strong>Function scoped:</strong> (niet block scoped)</li><li><strong>Hoisting:</strong> Kan rare fouten veroorzaken</li><li><strong>Kan veranderen:</strong> Ja, opnieuw toewijzen</li><li><strong>Aanbeveling:</strong> Gebruik let of const in plaats hiervan</li><li><strong>Moderne code:</strong> var zie je niet meer</li></ul>',
+                
+                // Operators
+                '===': '<p><strong>=== (Strict Equality)</strong> - Vergelijkt waarde EN type</p><p>=== controleert of twee dingen PRECIES hetzelfde zijn (zowel waarde als type).</p><ul><li><strong>Streng:</strong> 5 === "5" is FALSE (getal vs tekst)</li><li><strong>Aangeraden:</strong> Altijd === gebruiken in JavaScript</li><li><strong>Tegenpartij:</strong> == (losse vergelijking - niet aanbevolen)</li><li><strong>Voorbeeld:</strong> if (antwoord === "ja") { } </li><li><strong>Type check:</strong> typeof x === "string"</li></ul>',
+                '!==': '<p><strong>!== (Strict Inequality)</strong> - NIET gelijk?</p><p>!== is het tegenovergestelde van ===. Retourneert true als NIET hetzelfde.</p><ul><li><strong>Retourneert:</strong> true als NIET gelijk, false als wel gelijk</li><li><strong>Gebruikt:</strong> Veel in voorwaarden</li><li><strong>Aangeraden:</strong> In JavaScript</li><li><strong>Voorbeeld:</strong> if (status !== "active") { disable(); }</li><li><strong>Vergelijk:</strong> 5 !== "5" is TRUE</li></ul>',
+                '&&': '<p><strong>&& (AND Operator)</strong> - Beide voorwaarden moeten waar zijn</p><p>&& betekent: beide voorwaarden moeten TRUE zijn anders hele uitdrukking is FALSE.</p><ul><li><strong>Voorbeeld:</strong> if (leeftijd >= 18 && heeftRijbewijs) { mag_rijden(); }</li><li><strong>Kortsluiting:</strong> Stopt zodra eerste false is</li><li><strong>Gebruikt:</strong> Veel in logica en voorwaarden</li><li><strong>Alle waar?</strong> Beide moeten true zijn!</li><li><strong>Tegenpartij:</strong> || (OR operator)</li></ul>',
+                '||': '<p><strong>|| (OR Operator)</strong> - Minstens één voorwaarde waar</p><p>|| betekent: ALS MINSTENS één voorwaarde TRUE is, dan hele uitdrukking TRUE.</p><ul><li><strong>Voorbeeld:</strong> if (isWeekend || isVakantie) { geen_school(); }</li><li><strong>Kortsluiting:</strong> Stopt zodra eerste true is</li><li><strong>Fallback:</strong> const naam = input || "Anoniem";</li><li><strong>Minstens één:</strong> Eén of beide hoeft true te zijn!</li><li><strong>Tegenpartij:</strong> && (AND operator)</li></ul>',
+                
+                // Methods & Functions
+                'push': '<p><strong>push()</strong> - Voegt element toe aan array</p><p>push() voegt een nieuwe waarde toe AAN HET EIND van een array.</p><ul><li><strong>Modifieert:</strong> De originele array!</li><li><strong>Retourneert:</strong> De nieuwe lengte van de array</li><li><strong>Voorbeeld:</strong> const arr = [1,2,3]; arr.push(4); // arr = [1,2,3,4]</li><li><strong>Meerdere:</strong> arr.push(4, 5, 6);</li><li><strong>Tegenpartij:</strong> pop() (verwijdert laatste)</li></ul>',
+                'pop': '<p><strong>pop()</strong> - Verwijdert laatste element</p><p>pop() verwijdert het LAATSTE element van een array en geeft het terug.</p><ul><li><strong>Retourneert:</strong> Het verwijderde element</li><li><strong>Modifieert:</strong> De originele array!</li><li><strong>Voorbeeld:</strong> const arr = [1,2,3]; const x = arr.pop(); // x=3, arr=[1,2]</li><li><strong>Leeg:</strong> Als array leeg is, retourneert undefined</li><li><strong>Tegenpartij:</strong> push() (voegt toe)</li></ul>',
+                'map': '<p><strong>map()</strong> - Transformeert elk element</p><p>map() maakt een NIEUWE array waarbij elk element getransformeerd is.</p><ul><li><strong>Syntax:</strong> arr.map(element => element * 2)</li><li><strong>Retourneert:</strong> Nieuwe array (origineel onveranderd)</li><li><strong>Voorbeeld:</strong> [1,2,3].map(x => x * 2) = [2,4,6]</li><li><strong>Functioneel:</strong> Zeer schoon en modern</li><li><strong>Perfect voor:</strong> Converteren/transformeren van data</li></ul>',
+                'filter': '<p><strong>filter()</strong> - Selecteert elementen die voldoen</p><p>filter() maakt een NIEUWE array met ALLEEN de elementen die aan voorwaarde voldoen.</p><ul><li><strong>Syntax:</strong> arr.filter(element => element > 5)</li><li><strong>Retourneert:</strong> Nieuwe array (origineel onveranderd)</li><li><strong>Voorbeeld:</strong> [1,5,8,3].filter(x => x > 4) = [5,8]</li><li><strong>Behoud:</strong> Originele array intact</li><li><strong>Veel gebruikt:</strong> Voor selectie en filteren</li></ul>',
+                'forEach': '<p><strong>forEach()</strong> - Loopt door elk element</p><p>forEach() voert dezelfde code uit voor elk element in de array.</p><ul><li><strong>Syntax:</strong> arr.forEach((item, index) => { console.log(item); })</li><li><strong>Geen return:</strong> Retourneert undefined</li><li><strong>Voorbeeld:</strong> [\'a\',\'b\',\'c\'].forEach(letter => console.log(letter));</li><li><strong>Alternatief:</strong> Voor for loop</li><li><strong>Parameters:</strong> element, index (optioneel), array (optioneel)</li></ul>',
+                
+                // Programmeer concepten
+                'loop': '<p><strong>Loop</strong> - Herhaalt code totdat voorwaarde niet meer waar</p><p>Loops laten je code meerdere keren uitvoeren. Scheelt veel typwerk!</p><ul><li><strong>Types:</strong> for, while, do-while, forEach</li><li><strong>Iteratie:</strong> Aantal keren dat de loop zich herhaalt</li><li><strong>Break:</strong> Voortijdig uit de loop (break;)</li><li><strong>Continue:</strong> Naar volgende iteratie (continue;)</li><li><strong>Vermijd:</strong> Infinite loops (eindeloze loops)</li></ul>',
+                'async': '<p><strong>async/await</strong> - Asynchrone programmering</p><p>async/await laat je code niet-blokerend werken. Perfect voor APIs en bestanden!</p><ul><li><strong>Syntax:</strong> async function getData() { const data = await fetch(...); }</li><li><strong>Niet-blokerend:</strong> Code wacht, maar rest van programma loopt door</li><li><strong>Schoon:</strong> Veel schoner dan Promises</li><li><strong>Essentieel:</strong> Voor netwerk calls, file operaties</li><li><strong>Try-catch:</strong> try { await... } catch (error) { }</li></ul>',
+                'promise': '<p><strong>Promise</strong> - Object voor asynchrone operaties</p><p>Een Promise is een "belofte" dat iets gaat gebeuren, nu of later.</p><ul><li><strong>States:</strong> pending (wachten), fulfilled (klaar), rejected (fout)</li><li><strong>Methodes:</strong> .then(), .catch(), .finally()</li><li><strong>Chaining:</strong> promise.then().then().catch()</li><li><strong>Voorbeeld:</strong> fetch(url).then(r => r.json()).then(data => console.log(data));</li><li><strong>Basis van:</strong> async/await</li></ul>',
+            };
+            
+            // Check of tekst een bekend concept bevat
+            const lowerText = text.toLowerCase().trim();
+            for (const [key, explanation] of Object.entries(explanations)) {
+                if (lowerText.includes(key) || lowerText === key) {
+                    return explanation;
+                }
+            }
+            
+            // Generieke uitleg voor onbekende termen
+            return `
+                <p><strong>Interessante term:</strong></p>
+                <div class="explanation-selected-text">"${text.substring(0, 60)}${text.length > 60 ? '...' : ''}"</div>
+                
+                <p>Dit is een interessant deel van je code. Onderzoek:</p>
+                <ul>
+                    <li><strong>Context:</strong> Waar en hoe wordt dit gebruikt?</li>
+                    <li><strong>Rol:</strong> Wat doet het in dit specifieke moment?</li>
+                    <li><strong>Impact:</strong> Hoe beïnvloedt het de logica?</li>
+                    <li><strong>Alternatieven:</strong> Zijn er andere manieren?</li>
+                </ul>
+                
+                <p style="color: #9ca3af; font-size: 0.9em; margin-top: 14px;">💭 <em>Tip: Hover over dit element in je IDE voor meer tooltips</em></p>
+            `;
+        }
+
+        function showExplanationContent(selectedText, explanation) {
+            const content = document.getElementById('explanationContent');
+            document.getElementById('explanationTitle').textContent = '💡 AI Uitleg';
+            
+            // Convert markdown-style formatting to HTML for better readability
+            const formattedExplanation = explanation
+                // Bold: **text** → <strong>text</strong>
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                // Headers with emoji
+                .replace(/^(📝|💡|🎯|⚡|🔄|⚠️|🛡️|✅|🔀) (.+)$/gm, '<div style="margin-top: 12px; font-weight: 600; color: #fbbf24;">$1 $2</div>')
+                // Code blocks: ```code``` → styled blocks
+                .replace(/```([^`]+)```/g, '<pre style="background: rgba(0,0,0,0.5); color: #c7d2fe; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 0.85em; margin: 8px 0; border-left: 3px solid #60a5fa;">$1</pre>')
+                // Bullet points: - text → styled
+                .replace(/^- (.+)$/gm, '<div style="margin-left: 16px; padding: 4px 0; color: #e5e7eb;">• $1</div>')
+                // Line breaks
+                .replace(/\n\n/g, '</div><div style="margin-top: 12px;">')
+                // Preserve line breaks within paragraphs
+                .replace(/\n(?!-|💡|🎯|⚡)/g, '<br>');
+            
+            // Formatted content met de geselecteerde tekst
+            content.innerHTML = `
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 8px;">
+                    <div style="background: rgba(96, 165, 250, 0.15); padding: 10px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9em; color: #bfdbfe; border-left: 3px solid #60a5fa;">
+                        <strong style="color: #e0e7ff;">Je highlightte:</strong><br>
+                        <code style="background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 3px; color: #a5f3fc;">"${selectedText.substring(0, 80)}${selectedText.length > 80 ? '...' : ''}"</code>
+                    </div>
+                    <div style="color: #d1d5db; line-height: 1.6; font-size: 0.95em;">
+                        <div>${formattedExplanation}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('generateMoreBtn').style.display = 'inline-block';
+        }
+
+        function showExplanationError(error) {
+            const content = document.getElementById('explanationContent');
+            document.getElementById('explanationTitle').textContent = '⚠️ Fout';
+            content.innerHTML = `
+                <div style="color: #92400e;">
+                    <p><strong>Fout bij uitleg:</strong></p>
+                    <p style="font-size: 0.9em;">${error.message}</p>
+                    <p style="margin-top: 12px; font-size: 0.85em;"><em>Zorg dat de prompt-server draait</em></p>
+                </div>
+            `;
+            document.getElementById('generateMoreBtn').style.display = 'none';
+        }
+
+        async function generateMoreExplanation() {
+            if (!lastSelectedText) return;
+            
+            document.getElementById('explanationContent').innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Meer info laden...</p>
+                </div>
+            `;
+            
+            try {
+                const moreDetail = await fetch('http://localhost:3001/api/explain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: lastSelectedText,
+                        context: 'dashboard-detail',
+                        detail: 'high',
+                        userLevel: document.getElementById('skillBadge')?.textContent || 'Beginner'
+                    })
+                }).then(r => r.json());
+                
+                showExplanationContent(lastSelectedText, moreDetail.explanation || moreDetail.message);
+            } catch (error) {
+                showExplanationError(error);
+            }
+        }
+
+        function minimizeSticky() {
+            const sticky = document.getElementById('explanationSticky');
+            sticky.classList.toggle('minimized');
+            const btn = document.getElementById('minimizeBtn');
+            btn.textContent = sticky.classList.contains('minimized') ? '+' : '−';
+        }
+
+        function closeExplanation() {
+            const sticky = document.getElementById('explanationSticky');
+            sticky.style.display = 'none';
+            sticky.classList.remove('minimized');
+            document.getElementById('minimizeBtn').textContent = '−';
+            window.getSelection().removeAllRanges();
+        }
+
+        initializeModeSelector();
+        
+        // ========== SLIDESHOW FUNCTIONALITY ==========
+        let slides = [];
+        let currentSlideIndex = 0;
+        let slideshowInterval = null;
+
+        async function loadSlides() {
+            try {
+                const response = await fetch('/api/slides');
+                if (response.ok) {
+                    const data = await response.json();
+                    slides = Array.isArray(data) ? data : (data.slides || []);
+                    updateSlideshow();
+                } else {
+                    console.log('No slides API available, using empty state');
+                    slides = [];
+                    updateSlideshow();
+                }
+            } catch (error) {
+                console.log('Slides API not available:', error.message);
+                slides = [];
+                updateSlideshow();
+            }
+        }
+
+        function updateSlideshow() {
+            const empty = document.getElementById('slideshowEmpty');
+            const viewer = document.getElementById('slideshowViewer');
+            const counter = document.getElementById('slideCounter');
+            
+            if (slides.length === 0) {
+                empty.style.display = 'block';
+                viewer.style.display = 'none';
+                counter.textContent = '0 / 0';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            viewer.style.display = 'block';
+            
+            // Update counter
+            counter.textContent = `${currentSlideIndex + 1} / ${slides.length}`;
+            
+            // Show current slide
+            const slide = slides[currentSlideIndex];
+            if (slide) {
+                document.getElementById('slideTitle').textContent = slide.title || `Code Snippet ${currentSlideIndex + 1}`;
+                document.getElementById('slideLanguage').textContent = slide.language || 'code';
+                document.getElementById('slideCode').textContent = slide.code || '';
+            }
+        }
+
+        function nextSlide() {
+            if (slides.length === 0) return;
+            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+            updateSlideshow();
+        }
+
+        function previousSlide() {
+            if (slides.length === 0) return;
+            currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
+            updateSlideshow();
+        }
+
+        function toggleSlideshow() {
+            const toggleBtn = document.getElementById('slideshowToggle');
+            
+            if (slideshowInterval) {
+                // Stop slideshow
+                clearInterval(slideshowInterval);
+                slideshowInterval = null;
+                toggleBtn.textContent = '▶️ Start';
+                toggleBtn.classList.remove('active');
+            } else {
+                // Start slideshow
+                if (slides.length === 0) {
+                    showToast('Geen slides beschikbaar om af te spelen', 'warning');
+                    return;
+                }
+                slideshowInterval = setInterval(nextSlide, 5000); // 5 seconds per slide
+                toggleBtn.textContent = '⏸️ Stop';
+                toggleBtn.classList.add('active');
+                showToast('Slideshow gestart - elke 5 seconden een nieuwe slide', 'info');
+            }
+        }
+
+        // Load slides on page load and refresh periodically
+        loadSlides();
+        setInterval(loadSlides, 5000); // Refresh every 5 seconds
+        
+        // Refresh slides every 30 seconds to catch new additions
+        setInterval(loadSlides, 30000);
+    </script>
+</body>
+</html>

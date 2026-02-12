@@ -1,0 +1,194 @@
+[
+  {
+    "id": "slide-1770037734536-5t4617w9k",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "if (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770037734536,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770037738363-1f4rk9pvl",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "if (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770037738363,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770037759376-okf2qkth9",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "let",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770037759376,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770037811762-9vu5ujqp9",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "// Wachtwoord opslaan\r\nlet wachtwoord = \"Test1234\";\r\n\r\n// Controle: minimaal 8 karakters\r\nlet isLangGenoeg = wachtwoord.length >= 8;\r\n\r\n// Controle: bevat minstens één cijfer\r\nlet bevatCijfer = false;\r\nfor (let i = 0; i < wachtwoord.length; i++) {\r\n    let char = wachtwoord[i];\r\n    if (!isNaN(char) && char !== \" \") {  \r\n        bevatCijfer = true;\r\n        break;\r\n    }\r\n}\r\n\r\n// Eindresultaat\r\nif (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}\r\n",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770037811762,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "test-slide-123",
+    "category": "Functions",
+    "concept": "python",
+    "difficulty": "beginner",
+    "language": "python",
+    "created": 1770038111100,
+    "explanation": "This is a simple Python function that prints Hello World and returns a greeting string.",
+    "code": "def hello_world():\n    print('Hello, World!')\n    return 'Hello'",
+    "title": "Python Test Function",
+    "tags": [
+      "python",
+      "functions",
+      "beginner"
+    ]
+  },
+  {
+    "id": "slide-1770038356424-biua7oodx",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "let wachtwoord = \"Test1234\";\r\n\r\n// Controle: minimaal 8 karakters\r\nlet isLangGenoeg = wachtwoord.length >= 8;\r\n\r\n// Controle: bevat minstens één cijfer\r\nlet bevatCijfer = false;\r\nfor (let i = 0; i < wachtwoord.length; i++) {\r\n    let char = wachtwoord[i];\r\n    if (!isNaN(char) && char !== \" \") {  \r\n        bevatCijfer = true;\r\n        break;\r\n    }\r\n}\r\n\r\n// Eindresultaat\r\nif (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}\r\n",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770038356424,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770041012384-u7tnlt3be",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "// Eindresultaat\r\nif (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}\r\n",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770041012384,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770044488191-kppj0vnbx",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "let wachtwoord = \"Test1234\";\r\n\r\n// Controle: minimaal 8 karakters\r\nlet isLangGenoeg = wachtwoord.length >= 8;\r\n\r\n// Controle: bevat minstens één cijfer\r\nlet bevatCijfer = false;\r\nfor (let i = 0; i < wachtwoord.length; i++) {\r\n    let char = wachtwoord[i];\r\n    if (!isNaN(char) && char !== \" \") {  \r\n        bevatCijfer = true;\r\n        break;\r\n    }\r\n}\r\n\r\n// Eindresultaat\r\nif (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}\r\n",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770044488191,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770117476146-efp1onarp",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "// Eindresultaat\r\nif (isLangGenoeg && bevatCijfer) {\r\n    console.log(\"Wachtwoord is sterk\");\r\n} else {\r\n    console.log(\"Wachtwoord is te zwak\");\r\n}\r\n",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770117476146,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770210823403-kue2k8tq4",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "console.log(`Sterkte: ${resultaat.sterkte} (${resultaat.score}/5 punten)`);\r\nconsole.log(\"\");\r\nconsole.log(\"Criteria:\");",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770210823403,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770211312650-cb9u189k3",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "let resultaat = bepaalWachtwoordSterkte();\r\nconsole.log(`Sterkte: ${resultaat.sterkte} (${resultaat.score}/5 punten)`);\r\nconsole.log(\"\");\r\nconsole.log(\"Criteria:\");\r\nresultaat.criteria.forEach(criterium => console.log(`  ${criterium}`));\r\n\r\nconsole.log(\"\");\r\nif (resultaat.score === 5) {\r\n    console.log(\"🎉 Perfect! Je wachtwoord voldoet aan alle criteria!\");\r\n} else {\r\n    console.log(\"💡 Tip: Verbeter je wachtwoord door te voldoen aan meer criteria.\");\r\n}",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770211312650,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  },
+  {
+    "id": "slide-1770244184388-tyno92mpb",
+    "title": "Code Example - javascript",
+    "concept": "selected-code",
+    "code": "function bepaalWachtwoordSterkte() {\r\n    let score = 0;\r\n    let criteria = [];\r\n    \r\n    if (isLangGenoeg) {\r\n        score++;\r\n        criteria.push(\"✅ Minimaal 8 karakters\");\r\n    } else {\r\n        criteria.push(\"❌ Minimaal 8 karakters\");\r\n    }\r\n    ",
+    "language": "javascript",
+    "explanation": "Selected code from editor for slideshow learning",
+    "difficulty": "beginner",
+    "category": "Code Examples",
+    "created": 1770244184388,
+    "tags": [
+      "javascript",
+      "selected-code",
+      "slideshow"
+    ]
+  }
+]

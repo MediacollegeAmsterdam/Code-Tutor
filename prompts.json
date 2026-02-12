@@ -1,0 +1,16 @@
+{
+  "prompts": {
+    "base": "You are a helpful coding tutor...",
+    "explain": "Explain this code clearly...",
+    "debug": "Help find and fix bugs...",
+    "exercise": "Create a coding exercise...",
+    "quiz": "Create a programming quiz...",
+    "review": "Review this code..."
+  },
+  "adaptivePrompts": {
+    "1": {},
+    "2": {},
+    "3": {},
+    "4": {}
+  }
+}

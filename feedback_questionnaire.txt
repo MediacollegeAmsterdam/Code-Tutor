@@ -1,0 +1,105 @@
+================================================================================
+FEEDBACK VRAGENLIJST - CODING TUTOR CHAT PARTICIPANT
+================================================================================
+
+SECTIE 1: VRAGEN VOOR DOCENTEN
+================================================================================
+
+1. EFFECTIVITEIT VAN ONDERSTEUNING
+   - In hoeverre helpt de coding tutor studenten bij het begrijpen van programmeerconcepten?
+   - Ziet u verbetering in de vragen die studenten aan u stellen na gebruik van de tutor?
+   - Helpt de tutor om veelgestelde vragen te reduceren?
+
+2. INHOUD EN KWALITEIT
+   - Is de gegeven uitleg duidelijk en begrijpelijk voor uw doelgroep?
+   - Zijn de codevoorbeelden relevant en nuttig?
+   - Mist u bepaalde onderwerpen of soorten vragen in de tutor?
+   - Zijn er situaties waarin de tutor foutieve informatie geeft?
+
+3. INTEGRATIE IN ONDERWIJS
+   - Hoe goed past de tutor in uw huidige lesformat?
+   - Stimuleert de tutor zelfstandig leren?
+   - Ziet u dat studenten meer tijd hebben voor diepere vragen dankzij de tutor?
+
+4. USABILITY EN TOEGANKELIJKHEID
+   - Hoe makkelijk is het voor studenten om de tutor te gebruiken?
+   - Zijn er technische problemen die u bent tegengekomen?
+   - Zou u aanvullende functies willen zien?
+
+5. VERBETERING
+   - Wat zijn de sterkste punten van de coding tutor?
+   - Wat kan er verbeterd worden?
+   - Heeft u suggesties voor nieuwe features?
+
+6. ALGEMEEN
+   - Op een schaal van 1-10, hoe waardevol is de coding tutor voor uw onderwijs?
+   - Zou u de tutor aan collega's aanbevelen?
+   - Welke feedback heeft de grootste prioriteit?
+
+
+SECTIE 2: VRAGEN VOOR STUDENTEN
+================================================================================
+
+1. GEBRUIKERSERVARING
+   - Hoe makkelijk vind je het om de coding tutor te gebruiken?
+   - Kun je gemakkelijk de informatie vinden die je nodig hebt?
+   - Hoe snel krijg je antwoord op je vragen?
+
+2. LEEREFFECTIVITEIT
+   - Helpt de coding tutor je om programmeerconcepten beter te begrijpen?
+   - Zijn de uitleggen duidelijk en begrijpelijk?
+   - Leer je beter door voorbeelden of meer door tekstuele uitleg?
+   - Voel je je zelfverzekerder met coderen na het gebruiken van de tutor?
+
+3. INHOUD EN RELEVANTIE
+   - Beantwoordt de tutor je vragen goed?
+   - Zijn de gegeven codevoorbeelden nuttig?
+   - Mist je bepaalde onderwerpen of functies?
+   - Geeft de tutor soms foutieve informatie?
+
+4. VERGELIJKING MET ANDERE BRONNEN
+   - Vertrouw je meer op de tutor of op andere bronnen (docent, internet)?
+   - Hoe vergelijkt de tutor met ChatGPT of andere AI-hulpmiddelen?
+   - Zou je de tutor aanbevelen aan andere studenten?
+
+5. TECHNISCHE ASPECTEN
+   - Werkt de tutor betrouwbaar?
+   - Ben je tegengekomen op bugs of technische problemen?
+   - Vond je het interface aangenaam om mee te werken?
+
+6. VERBETERING
+   - Wat vind je het beste aan de coding tutor?
+   - Wat zou je willen verbeteren?
+   - Welke nieuwe functies zou je graag zien?
+   - Hoe zou de tutor je nog beter kunnen helpen met leren?
+
+7. GEBRUIK EN FREQUENTIE
+   - Hoe vaak gebruik je de coding tutor per week?
+   - In welke situaties gebruik je hem het meest? (thuis, in klas, huiswerk, etc.)
+   - Zou je hem vaker gebruiken als bepaalde dingen anders waren?
+
+8. ALGEMEEN
+   - Op een schaal van 1-10, hoe waardevol is de coding tutor voor jou?
+   - Zou je de tutor aan medestudenten aanbevelen?
+   - Heeft dit tool je helpen met het maken van je huiswerk of projecten?
+
+
+SECTIE 3: AANVULLENDE VRAGEN (BEIDE GROEPEN)
+================================================================================
+
+- Wat zijn volgens jou de 3 grootste sterke punten?
+- Wat zijn volgens jou de 3 grootste verbeterpunten?
+- Heb je andere opmerkingen of suggesties die je kwijt wilt?
+- Wie denk je dat het meest baat heeft bij deze tool: beginners of gevorderden?
+
+================================================================================
+OPMERKINGEN VOOR AFNAME:
+================================================================================
+
+- Dit formulier kan mondeling of schriftelijk afgenomen worden
+- Voor studenten: anoniem invullen kan openheid bevorderen
+- Voor docenten: zowel spontane feedback als gestructureerde antwoorden verzamelen
+- Overweeg om enkele vragen per week te stellen in plaats van alles ineens
+- Focus op specifieke use-cases in plaats van algemene vragen
+
+================================================================================
