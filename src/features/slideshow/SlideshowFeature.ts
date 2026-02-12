@@ -117,31 +117,41 @@ export class SlideshowFeature {
 			prompt: 'Enter a title for this learning slide',
 			placeHolder: 'e.g., "For Loop Example" or "Variable Declaration"'
 		});
-		if (!title) return undefined;
+		if (!title) {
+            return undefined;
+        }
 
 		const concept = await vscode.window.showInputBox({
 			prompt: 'What programming concept does this demonstrate?',
 			placeHolder: 'e.g., "loops", "variables", "functions", "conditionals"'
 		});
-		if (!concept) return undefined;
+		if (!concept) {
+            return undefined;
+        }
 
 		const explanation = await vscode.window.showInputBox({
 			prompt: 'Brief explanation for beginners (what does this code do?)',
 			placeHolder: 'e.g., "This loop counts from 1 to 10 and prints each number"'
 		});
-		if (!explanation) return undefined;
+		if (!explanation) {
+            return undefined;
+        }
 
 		const difficulty = await vscode.window.showQuickPick(
 			['beginner', 'intermediate', 'advanced'],
 			{ placeHolder: 'Select difficulty level for this slide' }
 		);
-		if (!difficulty) return undefined;
+		if (!difficulty) {
+            return undefined;
+        }
 
 		const category = await vscode.window.showQuickPick(
 			['Basic Syntax', 'Control Flow', 'Functions', 'Data Structures', 'Object-Oriented', 'Best Practices', 'Common Patterns'],
 			{ placeHolder: 'Select category for this slide' }
 		);
-		if (!category) return undefined;
+		if (!category) {
+            return undefined;
+        }
 
 		// Create and save slide
 		const slide: EducationalSlide = {

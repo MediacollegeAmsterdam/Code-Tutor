@@ -65,7 +65,9 @@ export async function getValidModel(
 ): Promise<vscode.LanguageModelChat | null> {
 	try {
 		const list = await listConcreteModels();
-		if (list.length === 0) return null;
+		if (list.length === 0) {
+            return null;
+        }
 
 		if (model && !isAutoModel(model)) {
 			const found = list.find((m: vscode.LanguageModelChat) => m.id === model.id);
@@ -152,7 +154,9 @@ export async function sendChatRequest(
 
 			for (let i = 0; i < list.length; i++) {
 				const candidate = list[i];
-				if (i === currentIndex) continue;
+				if (i === currentIndex) {
+                    continue;
+                }
 
 				try {
 					stream.markdown(`_(Andere model geprobeerd: ${candidate.name})_\n`);

@@ -109,8 +109,12 @@ estimatedTime: [aantal minuten, bijv 45]
 				const metadata = metadataMatch[1];
 				const titleMatch = metadata.match(/title:\s*(.+)/);
 				const diffMatch = metadata.match(/difficulty:\s*(.+)/);
-				if (titleMatch) title = titleMatch[1].trim();
-				if (diffMatch) difficulty_val = diffMatch[1].trim();
+				if (titleMatch) {
+                    title = titleMatch[1].trim();
+                }
+				if (diffMatch) {
+                    difficulty_val = diffMatch[1].trim();
+                }
 			}
 			
 			// Generate filename with timestamp
