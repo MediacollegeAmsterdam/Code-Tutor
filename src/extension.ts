@@ -200,10 +200,17 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	// Initialize slideshow feature
+	// IMPORTANT: Must be initialized before route registration (startServer)
 	slideshowFeature = new SlideshowFeature(
 		studentDataService,
 		() => vscode.commands.executeCommand('code-tutor.openDashboard')
 	);
+	
+	// Validate slideshow feature initialized
+	if (!slideshowFeature) {
+		console.error('Failed to initialize SlideshowFeature');
+		vscode.window.showErrorMessage('Code Tutor: Failed to initialize slideshow feature');
+	}
 
 	// Load prompts from JSON file for prompt server functionality
 	const loadPrompts = () => {
@@ -282,6 +289,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		// Configure router with all dependencies
+		// IMPORTANT: All features must be initialized before this point
 		const routeConfig: RouteConfig = {
 			context,
 			sseManager,
@@ -291,7 +299,7 @@ export function activate(context: vscode.ExtensionContext) {
 			getAllStudentsStats,
 			getClassStats,
 			getEarlyWarnings,
-			slideshowFeature,
+			slideshowFeature, // Initialized above, routes handle null gracefully
 			getSkillLevel,
 			calculateAchievements,
 			LEARNING_PATHS,
